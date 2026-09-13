@@ -189,13 +189,20 @@ export const api = {
   
   executeFileErasure: (payload: {
     target_path: string;
-    method: string;
-    passes: number;
-    confirmation: string;
+    method?: string;
+    passes?: number;
+    confirmation?: string;
+    dry_run?: boolean;
   }) =>
-    request<ErasureJob>('/erasure/execute', {
+    request<any>('/erasure/execute', {
       method: 'POST',
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        target_path: payload.target_path,
+        confirmation_token: payload.confirmation,
+        overwrite_passes: payload.passes || 3,
+        dry_run: payload.dry_run ?? false,
+        reason: 'Authorized forensic secure file erasure',
+      }),
     }),
 
   // 7. Read-Only Evidence Intake
@@ -221,14 +228,15 @@ export const api = {
 
   // 8. Recovery Workspace & Carving
   scanFilesystemRecovery: (caseId: number, evidenceId: string) =>
-    request<{ candidates: RecoveryCandidate[]; total: number }>(`/recovery/scan?case_id=${caseId}&evidence_id=${evidenceId}`, {
+    request<{ candidates: RecoveryCandidate[]; total_candidates_found: number }>(`/cases/${caseId}/recovery/scan`, {
       method: 'POST',
+      body: JSON.stringify({ evidence_id: evidenceId }),
     }),
 
   carveFiles: (caseId: number, evidenceId: string, formats: string[]) =>
-    request<{ carved_artifacts: CarvedArtifact[]; total: number }>(`/carving/scan`, {
+    request<{ carved_artifacts: CarvedArtifact[]; metrics: any }>(`/cases/${caseId}/carving/scan`, {
       method: 'POST',
-      body: JSON.stringify({ case_id: caseId, evidence_id: evidenceId, formats }),
+      body: JSON.stringify({ evidence_id: evidenceId, target_formats: formats }),
     }),
 
   // 9. Job Details & Execution Monitor

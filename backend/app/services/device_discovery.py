@@ -32,7 +32,7 @@ class DevicePathValidator:
 
     @staticmethod
     def validate_and_canonicalize(path: str) -> Optional[str]:
-        """
+        r"""
         Validates device path against allowlist regex pattern (Linux /dev/sd... or Windows C:\, D:\).
         Canonicalizes path and checks for path traversal sequences ('..').
         """

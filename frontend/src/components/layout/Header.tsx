@@ -10,6 +10,17 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   const { user, isAuthenticated, logout } = useAuth();
   const { cases, activeCase, setActiveCaseId } = useCase();
+  const [isSafeMode, setIsSafeMode] = React.useState<boolean>(true);
+
+  React.useEffect(() => {
+    import('../../services/api').then(({ api }) => {
+      api.getSystemHealth().then(res => {
+        if (res.data) {
+          setIsSafeMode(res.data.safe_mode);
+        }
+      });
+    });
+  }, []);
 
   return (
     <header className="h-16 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between sticky top-0 z-30 shadow-sm">
@@ -45,10 +56,17 @@ export const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
       {/* Right Controls & User Profile */}
       <div className="flex items-center space-x-4 text-xs">
         {/* System Safe Mode Indicator */}
-        <div className="flex items-center space-x-1.5 bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 px-3 py-1 rounded-full font-mono font-medium">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Simulation Active</span>
-        </div>
+        {isSafeMode ? (
+          <div className="flex items-center space-x-1.5 bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 px-3 py-1 rounded-full font-mono font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Simulation Active</span>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-1.5 bg-red-950/60 border border-red-500/40 text-red-300 px-3 py-1 rounded-full font-mono font-bold animate-pulse">
+            <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
+            <span>REAL MODE (Live Ops)</span>
+          </div>
+        )}
 
         {/* User Identity or Login Trigger */}
         {isAuthenticated && user ? (

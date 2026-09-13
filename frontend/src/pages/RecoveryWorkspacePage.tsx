@@ -46,8 +46,9 @@ export const RecoveryWorkspacePage: React.FC = () => {
     setIsScanning(false);
 
     if (res.data) {
-      setCandidates(res.data.candidates);
-      addToast('success', 'Filesystem Scan Complete', `Identified ${res.data.total} candidate entries.`);
+      setCandidates(res.data.candidates || []);
+      const count = res.data.total_candidates_found ?? res.data.candidates?.length ?? 0;
+      addToast('success', 'Filesystem Scan Complete', `Identified ${count} candidate entries.`);
     } else if (res.error) {
       addToast('error', 'Recovery Scan Blocked', res.error.error.message);
     }
@@ -60,8 +61,9 @@ export const RecoveryWorkspacePage: React.FC = () => {
     setIsCarving(false);
 
     if (res.data) {
-      setCarvedList(res.data.carved_artifacts);
-      addToast('success', 'Signature Carving Complete', `Extracted ${res.data.total} carved file artifacts.`);
+      setCarvedList(res.data.carved_artifacts || []);
+      const count = res.data.carved_artifacts?.length ?? 0;
+      addToast('success', 'Signature Carving Complete', `Extracted ${count} carved file artifacts.`);
     } else if (res.error) {
       addToast('error', 'Carving Blocked', res.error.error.message);
     }

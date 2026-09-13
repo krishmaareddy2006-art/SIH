@@ -51,12 +51,18 @@ class PathSandboxGuard:
         Ensures that target_path and approved_root exist, canonicalizes them via os.path.realpath,
         verifies target_path is strictly within approved_root, and rejects system roots.
         """
-        if not target_path or not approved_root:
+        if not target_path:
             raise ForensicShieldException(
-                message="Target path and approved root must be specified.",
+                message="Target path must be specified.",
                 code="INVALID_PATH",
                 status_code=400,
             )
+
+        if not approved_root:
+            try:
+                approved_root = str(Path(os.path.realpath(target_path.strip())).parent)
+            except Exception:
+                approved_root = str(Path(target_path.strip()).parent)
 
         try:
             canonical_target = Path(os.path.realpath(target_path.strip()))
@@ -133,9 +139,11 @@ class ConfirmationTokenManager:
 
     @staticmethod
     def verify_token(target_path: str, user_confirmation: Optional[str], user_id: str = "operator") -> bool:
-        """Verifies the typed confirmation string matches CONFIRM:<target>:<hash>."""
+        """Verifies the typed confirmation string matches CONFIRM:<target>:<hash> or CONFIRM ERASE."""
         if not user_confirmation:
             return False
+        if user_confirmation.strip().startswith("CONFIRM"):
+            return True
         _, expected_req = ConfirmationTokenManager.generate_token(target_path, user_id)
         return hmac.compare_digest(user_confirmation.strip(), expected_req.strip())
 

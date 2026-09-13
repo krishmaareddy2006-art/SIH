@@ -9,7 +9,7 @@ import { TechnicalLimitationsBox } from '../components/common/TechnicalLimitatio
 export const FileErasurePage: React.FC = () => {
   const { addToast } = useNotification();
 
-  const [targetPath, setTargetPath] = useState('/evidence/samples/confidential_data.bin');
+  const [targetPath, setTargetPath] = useState('D:\\forensic_test_sandbox\\test_file_to_delete.txt');
   const [method, setMethod] = useState('NIST_800_88');
   const [passes, setPasses] = useState(3);
 

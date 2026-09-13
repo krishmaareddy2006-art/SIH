@@ -28,18 +28,29 @@ export const DriveSanitizationPage: React.FC<{ selectedDevicePath?: string }> = 
   const [isLoading, setIsLoading] = useState(true);
   const [isExecuting, setIsExecuting] = useState(false);
   const [error, setError] = useState('');
+  const [isSafeMode, setIsSafeMode] = useState(true);
+  const [realDeviceOps, setRealDeviceOps] = useState(false);
 
   const loadDevices = async () => {
     setIsLoading(true);
     setError('');
-    const res = await api.listDevices();
-    if (res.data) {
-      setDevices(res.data);
-      if (!targetPath && res.data.length > 0) {
-        setTargetPath(res.data.find(d => !d.is_system_disk)?.device_path || res.data[0].device_path);
+    const [devRes, healthRes] = await Promise.all([
+      api.listDevices(),
+      api.getSystemHealth(),
+    ]);
+
+    if (healthRes.data) {
+      setIsSafeMode(healthRes.data.safe_mode);
+      setRealDeviceOps(healthRes.data.real_device_operations);
+    }
+
+    if (devRes.data) {
+      setDevices(devRes.data);
+      if (!targetPath && devRes.data.length > 0) {
+        setTargetPath(devRes.data.find(d => !d.is_system_disk)?.device_path || devRes.data[0].device_path);
       }
-    } else if (res.error) {
-      setError(res.error.error.message);
+    } else if (devRes.error) {
+      setError(devRes.error.error.message);
     }
     setIsLoading(false);
   };
@@ -83,14 +94,14 @@ export const DriveSanitizationPage: React.FC<{ selectedDevicePath?: string }> = 
       confirmation_token: token,
       case_id: activeCase.id,
       reason,
-      simulate: true,
+      simulate: isSafeMode,
     });
     setIsExecuting(false);
     setIsConfirmModalOpen(false);
 
     if (res.data) {
       setActiveJob(res.data);
-      addToast('success', 'Sanitization Initiated', `Job ${res.data.job_id} launched cleanly in simulation mode.`);
+      addToast('success', 'Sanitization Initiated', isSafeMode ? `Job ${res.data.job_id} launched cleanly in simulation mode.` : `Job ${res.data.job_id} launched in REAL HARDWARE MODE.`);
     } else if (res.error) {
       addToast('error', 'Sanitization Blocked', res.error.error.message);
     }
@@ -118,8 +129,8 @@ export const DriveSanitizationPage: React.FC<{ selectedDevicePath?: string }> = 
       <SafetyGateBanner
         devicePath={targetPath}
         isSystemDisk={selectedDev?.is_system_disk}
-        safeMode={true}
-        realDeviceOps={false}
+        safeMode={isSafeMode}
+        realDeviceOps={realDeviceOps}
       />
 
       {/* Wizard Form */}

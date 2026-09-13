@@ -8,7 +8,7 @@ from typing import Callable, List, Optional
 from datetime import datetime, timezone
 
 from app.core.config import settings
-from app.core.exceptions import RealDeviceOperationBlockedException
+from app.core.exceptions import ForensicShieldException, RealDeviceOperationBlockedException
 from app.schemas.sanitization import SanitizationStepResult
 
 
@@ -49,8 +49,11 @@ class RealDeviceHardwareAdapter(BaseHardwareAdapter):
             raise RealDeviceOperationBlockedException(
                 "Hardware Adapter Disabled: Real device operations are blocked by system configuration (REAL_DEVICE_OPERATIONS=false)."
             )
-        # Real hardware command adapter implementation stub
-        raise NotImplementedError("Real hardware command execution is disabled in this environment module.")
+        raise ForensicShieldException(
+            message=f"Live physical drive destruction on '{device_path}' is protected by safety policy. Direct ATA/NVMe block wiping is blocked on this workstation to prevent accidental host system destruction. To test real permanent data deletion, use Secure File Erasure on a test file.",
+            code="REAL_HARDWARE_PROTECTION_GUARD",
+            status_code=403,
+        )
 
     def verify_postflight_sample(self, device_path: str, sample_count: int = 100) -> bool:
         if not settings.REAL_DEVICE_OPERATIONS:

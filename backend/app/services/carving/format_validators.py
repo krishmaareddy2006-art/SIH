@@ -5,7 +5,7 @@ Produces confidence levels (HIGH, MEDIUM, LOW) with explicit forensic explanatio
 """
 
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import Optional, Tuple
 
 
 class BaseFormatValidator(ABC):

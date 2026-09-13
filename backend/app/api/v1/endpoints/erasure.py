@@ -16,7 +16,60 @@ from app.services.file_erasure import (
     PathSandboxGuard,
 )
 
+from fastapi import APIRouter, Depends, Request, Query
+import os
+import hashlib
+from pathlib import Path
+from app.core.exceptions import ForensicShieldException
+
 router = APIRouter()
+
+
+@router.get("/analyze")
+async def analyze_file_erasure(
+    path: str = Query(..., description="Target file or folder path to analyze"),
+    current_user: User = Depends(require_roles(["Administrator", "Operator"])),
+):
+    """Analyzes target path size and computes pre-erasure SHA-256 for audit tracking."""
+    if not path or not path.strip():
+        raise ForensicShieldException("Path must be specified", code="INVALID_PATH", status_code=400)
+
+    try:
+        canonical_target = Path(os.path.realpath(path.strip()))
+    except Exception as exc:
+        raise ForensicShieldException(f"Invalid path syntax: {str(exc)}", code="INVALID_PATH", status_code=400)
+
+    if not canonical_target.exists():
+        raise ForensicShieldException(
+            f"Target file or folder '{path}' does not exist on disk.",
+            code="FILE_NOT_FOUND",
+            status_code=404,
+        )
+
+    is_file = canonical_target.is_file()
+    pre_hash = "DIRECTORY_COLLECTION"
+
+    if is_file:
+        size = canonical_target.stat().st_size
+        h = hashlib.sha256()
+        with open(canonical_target, "rb") as f:
+            for chunk in iter(lambda: f.read(65536), b""):
+                h.update(chunk)
+        pre_hash = h.hexdigest()
+    else:
+        size = sum(f.stat().st_size for f in canonical_target.rglob("*") if f.is_file())
+
+    _, req_str = ConfirmationTokenManager.generate_token(str(canonical_target), current_user.username)
+
+    return {
+        "target_path": str(canonical_target),
+        "size_bytes": size,
+        "is_file": is_file,
+        "pre_erasure_sha256": pre_hash,
+        "pre_hash": pre_hash,
+        "confirmation_token_required": f"CONFIRM ERASE {path.strip()}",
+        "status": "ANALYZE_SUCCESS",
+    }
 
 
 @router.post("/token", response_model=ErasureTokenResponse)

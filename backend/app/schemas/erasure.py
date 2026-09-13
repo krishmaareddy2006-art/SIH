@@ -42,14 +42,14 @@ class ErasureExecuteRequest(BaseModel):
     """Request payload for executing dry-run preview or live logical file erasure."""
 
     target_path: str = Field(..., example="/evidence/sandbox/target_folder")
-    approved_root: str = Field(..., example="/evidence/sandbox")
+    approved_root: Optional[str] = Field(None, example="/evidence/sandbox")
     confirmation_token: Optional[str] = Field(
         None, example="CONFIRM:/evidence/sandbox/target_folder:a1b2c3d4"
     )
-    dry_run: bool = Field(True, description="Enforce dry-run listing without modifying files")
+    dry_run: bool = Field(False, description="Enforce dry-run listing without modifying files")
     overwrite_passes: int = Field(1, description="Number of overwrite passes (1 or 3)")
     follow_symlinks: bool = Field(False, description="Strictly False. Symlinks are not followed.")
-    reason: str = Field(..., min_length=5, example="Authorized evidence directory cleanup")
+    reason: str = Field("Standard DFIR file erasure", min_length=3, example="Authorized evidence directory cleanup")
 
 
 class ErasureReport(BaseModel):

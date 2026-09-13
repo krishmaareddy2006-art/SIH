@@ -4,6 +4,7 @@ Initializes security middleware, request tracking, global exception handlers,
 API v1 versioned routing, and database tables.
 """
 
+
 import uuid
 import time
 from contextlib import asynccontextmanager

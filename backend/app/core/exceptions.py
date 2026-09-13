@@ -97,8 +97,16 @@ async def forensic_exception_handler(
         level=logging.WARNING if exc.status_code < 500 else logging.ERROR,
     )
 
+    headers = {
+        "Access-Control-Allow-Origin": request.headers.get("origin") or "*",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "*",
+        "Access-Control-Allow-Headers": "*",
+    }
+
     return JSONResponse(
         status_code=exc.status_code,
+        headers=headers,
         content=make_safe_error_payload(
             code=exc.code, message=exc.message, request_id=request_id
         ),
@@ -122,8 +130,16 @@ async def validation_exception_handler(
         level=logging.WARNING,
     )
 
+    headers = {
+        "Access-Control-Allow-Origin": request.headers.get("origin") or "*",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "*",
+        "Access-Control-Allow-Headers": "*",
+    }
+
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        headers=headers,
         content=make_safe_error_payload(
             code="VALIDATION_ERROR",
             message="Invalid request parameter or payload format.",
@@ -152,12 +168,21 @@ async def global_unhandled_exception_handler(
         },
     )
 
+    headers = {
+        "Access-Control-Allow-Origin": request.headers.get("origin") or "*",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "*",
+        "Access-Control-Allow-Headers": "*",
+    }
+
     # Return safe, non-leaking message to API client
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        headers=headers,
         content=make_safe_error_payload(
             code="INTERNAL_SERVER_ERROR",
             message="An unexpected system error occurred. System administrators have been notified.",
             request_id=request_id,
         ),
     )
+

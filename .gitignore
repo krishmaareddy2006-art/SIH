@@ -31,3 +31,8 @@ build/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Generated Evidence & Reports
+reports/
+**/carved_output/
+

@@ -1,10 +1,13 @@
 """Forensic Signature-Based File Carving API Endpoints with IDOR & RBAC Controls."""
 
+import os
 from typing import List
 from fastapi import APIRouter, Depends, Request, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.exceptions import ForensicShieldException
 from app.core.logging import audit_log
 from app.core.dependencies import (
     get_current_user,
@@ -35,7 +38,7 @@ async def scan_file_carving(
     case: ForensicCase = Depends(verify_case_access),
     current_user: User = Depends(require_roles(["Administrator", "Investigator", "Operator"])),
     db: Session = Depends(get_db),
-):
+) -> CarvingScanResponse:
     """
     Executes signature-based file carving scan:
     1. Computes pre-scan SHA-256 evidence hash.
@@ -75,7 +78,7 @@ async def scan_file_carving(
 async def list_carved_artifacts(
     case: ForensicCase = Depends(verify_case_access),
     db: Session = Depends(get_db),
-):
+) -> List[CarvedArtifactResponse]:
     """Lists all carved file artifacts attached to an accessible case context. (IDOR Protected)."""
     return db.query(CarvedFileArtifact).filter(CarvedFileArtifact.case_id == case.id).all()
 
@@ -84,16 +87,13 @@ async def list_carved_artifacts(
 async def download_carved_artifact(
     carved_id: str,
     db: Session = Depends(get_db),
-):
+) -> FileResponse:
     """Downloads the physical extracted carved file."""
-    import os
-    from fastapi.responses import FileResponse
-    from app.core.exceptions import ForensicShieldException
-
     artifact = db.query(CarvedFileArtifact).filter(CarvedFileArtifact.carved_id == carved_id).first()
     if not artifact or not artifact.output_file_path or not os.path.exists(artifact.output_file_path):
         raise ForensicShieldException("Carved file not found on disk", code="FILE_NOT_FOUND", status_code=404)
 
     filename = os.path.basename(artifact.output_file_path)
     return FileResponse(path=artifact.output_file_path, filename=filename)
+
 

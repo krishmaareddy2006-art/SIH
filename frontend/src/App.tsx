@@ -66,11 +66,12 @@ const AppContent: React.FC = () => {
 
       {/* Login Modal */}
       {isLoginModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080B14]/85 backdrop-blur-md animate-fade-in">
           <div className="relative max-w-md w-full">
             <button
               onClick={() => setIsLoginModalOpen(false)}
-              className="absolute right-4 top-4 text-slate-400 hover:text-slate-200 z-10"
+              className="absolute right-4 top-4 text-[#94A3B8] hover:text-[#F8FAFC] p-1.5 rounded-lg hover:bg-[#162032] transition-colors z-10 cursor-pointer"
+              aria-label="Close modal"
             >
               ✕
             </button>

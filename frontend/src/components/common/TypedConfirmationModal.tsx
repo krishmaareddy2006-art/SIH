@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, X, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, X, ShieldCheck, Copy, Check } from 'lucide-react';
 
 interface TypedConfirmationModalProps {
   isOpen: boolean;
@@ -23,16 +23,24 @@ export const TypedConfirmationModal: React.FC<TypedConfirmationModalProps> = ({
   warningDetails = [],
 }) => {
   const [typedInput, setTypedInput] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setTypedInput('');
+      setCopied(false);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   const isMatched = typedInput.trim() === expectedToken;
+
+  const handleCopyToken = () => {
+    navigator.clipboard.writeText(expectedToken);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,47 +51,49 @@ export const TypedConfirmationModal: React.FC<TypedConfirmationModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080B14]/85 backdrop-blur-md animate-fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div className="bg-slate-900 border border-red-500/40 rounded-2xl max-w-lg w-full p-6 shadow-2xl shadow-red-950/40 space-y-5">
+      <div className="bg-[#111827] border border-[#253044] rounded-2xl max-w-lg w-full p-6 shadow-elevated space-y-5">
         {/* Modal Header */}
-        <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-start justify-between border-b border-[#253044] pb-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2.5 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400">
-              <AlertTriangle className="w-6 h-6" />
+            <div className="p-2.5 bg-[#FB7185]/10 border border-[#FB7185]/30 rounded-xl text-[#FB7185]">
+              <AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <h3 id="modal-title" className="text-lg font-bold text-slate-100">
+              <h3 id="modal-title" className="text-base font-bold text-[#F8FAFC]">
                 {title}
               </h3>
-              <p className="text-xs text-red-400 font-medium">MANDATORY DESTRUCTIVE ACTION CONFIRMATION</p>
+              <p className="text-[11px] text-[#FB7185] font-mono font-medium tracking-wide">
+                MANDATORY SECURITY CONFIRMATION
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-200 p-1 rounded-lg hover:bg-slate-800 transition-colors"
+            className="text-[#94A3B8] hover:text-[#F8FAFC] p-1.5 rounded-lg hover:bg-[#162032] transition-colors"
             aria-label="Close modal"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Warning Details */}
-        <div className="space-y-3">
-          <p className="text-sm text-slate-300">
-            You are about to execute a destructive operation on:
+        {/* Target Details */}
+        <div className="space-y-3 text-xs">
+          <p className="text-[#94A3B8]">
+            You are about to execute a destructive forensic operation on:
           </p>
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-cyan-300 break-all">
+          <div className="bg-[#0B0F19] border border-[#253044] rounded-xl p-3 font-mono text-[#22D3EE] break-all select-all">
             {targetDescription}
           </div>
 
           {warningDetails.length > 0 && (
-            <div className="bg-red-950/50 border border-red-900/60 rounded-xl p-3 text-xs text-red-200 space-y-1">
-              <p className="font-semibold text-red-300">Warning Notices:</p>
-              <ul className="list-disc list-inside space-y-0.5">
+            <div className="bg-[#1C1014] border border-[#FB7185]/30 rounded-xl p-3 text-[11px] text-[#FB7185] space-y-1">
+              <p className="font-semibold uppercase tracking-wider text-[10px]">Safety Notices:</p>
+              <ul className="list-disc list-inside space-y-0.5 text-[#FDA4AF] pl-0.5">
                 {warningDetails.map((item, idx) => (
                   <li key={idx}>{item}</li>
                 ))}
@@ -95,16 +105,29 @@ export const TypedConfirmationModal: React.FC<TypedConfirmationModalProps> = ({
         {/* Form Input */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">
-              To confirm, type <span className="font-mono bg-slate-800 px-1.5 py-0.5 rounded text-amber-300 select-all">{expectedToken}</span> below:
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-medium text-[#94A3B8]">
+                Type the verification token below:
+              </label>
+              <button
+                type="button"
+                onClick={handleCopyToken}
+                className="flex items-center space-x-1 text-[11px] text-[#22D3EE] hover:text-[#67E8F9] font-mono cursor-pointer"
+              >
+                {copied ? <Check className="w-3 h-3 text-[#34D399]" /> : <Copy className="w-3 h-3" />}
+                <span>{copied ? 'Copied' : 'Copy token'}</span>
+              </button>
+            </div>
+            <div className="p-2 bg-[#0B0F19] border border-[#253044] rounded-lg font-mono text-[11px] text-[#FBBF24] mb-2 select-all break-all">
+              {expectedToken}
+            </div>
             <input
               type="text"
               value={typedInput}
               onChange={e => setTypedInput(e.target.value)}
               placeholder={expectedToken}
               autoFocus
-              className="w-full bg-slate-950 border border-slate-700 focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-xl px-3.5 py-2.5 text-sm font-mono text-slate-100 placeholder-slate-600 outline-none transition-all"
+              className="w-full bg-[#0B0F19] border border-[#253044] focus:border-[#FB7185] focus:ring-1 focus:ring-[#FB7185] rounded-xl px-3.5 py-2.5 text-xs font-mono text-[#F8FAFC] placeholder-[#64748B] outline-none transition-all"
             />
           </div>
 
@@ -113,21 +136,21 @@ export const TypedConfirmationModal: React.FC<TypedConfirmationModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-slate-100 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all"
+              className="px-4 py-2 text-xs font-semibold text-[#94A3B8] hover:text-[#F8FAFC] bg-[#0B0F19] hover:bg-[#162032] border border-[#253044] rounded-xl transition-all cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!isMatched || isSubmitting}
-              className={`flex items-center space-x-2 px-5 py-2 text-xs font-bold rounded-xl transition-all shadow-lg ${
+              className={`flex items-center space-x-2 px-5 py-2 text-xs font-semibold rounded-xl transition-all shadow-subtle ${
                 isMatched && !isSubmitting
-                  ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-900/50 cursor-pointer'
-                  : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
+                  ? 'bg-[#FB7185] hover:bg-[#E11D48] text-white cursor-pointer font-bold'
+                  : 'bg-[#162032] text-[#64748B] border border-[#253044] cursor-not-allowed'
               }`}
             >
               <ShieldCheck className="w-4 h-4" />
-              <span>{isSubmitting ? 'Executing...' : 'Confirm Execution'}</span>
+              <span>{isSubmitting ? 'Executing Operation...' : 'Confirm Execution'}</span>
             </button>
           </div>
         </form>

@@ -16,6 +16,10 @@ export type ClassificationStatus =
   | 'LOW'
   | 'COMPLETED'
   | 'INTEGRITY_FAILURE'
+  | 'SUCCESS'
+  | 'RUNNING'
+  | 'QUEUED'
+  | 'CANCELLED'
   | string;
 
 interface StatusBadgeProps {
@@ -26,54 +30,63 @@ interface StatusBadgeProps {
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'sm' }) => {
   const norm = status?.toString().toUpperCase() || '';
 
-  const isVerified = norm === 'VERIFIED' || norm === 'RECOVERABLE' || norm === 'HIGH' || norm === 'COMPLETED';
-  const isInconclusive = norm === 'INCONCLUSIVE' || norm === 'PARTIALLY_RECOVERABLE' || norm === 'MEDIUM';
-  const isFailed = norm === 'FAILED' || norm === 'CORRUPTED' || norm === 'INTEGRITY_FAILURE';
+  const isVerified = norm === 'VERIFIED' || norm === 'RECOVERABLE' || norm === 'HIGH' || norm === 'COMPLETED' || norm === 'SUCCESS';
+  const isInconclusive = norm === 'INCONCLUSIVE' || norm === 'PARTIALLY_RECOVERABLE' || norm === 'MEDIUM' || norm === 'QUEUED' || norm === 'RUNNING';
+  const isFailed = norm === 'FAILED' || norm === 'CORRUPTED' || norm === 'INTEGRITY_FAILURE' || norm === 'CANCELLED';
   const isUnsupported = norm === 'UNSUPPORTED' || norm === 'LOW';
   const isManualReview = norm === 'MANUAL REVIEW' || norm === 'MANUAL_REVIEW' || norm === 'METADATA_ONLY';
 
   let config = {
-    bg: 'bg-slate-800 text-slate-300 border-slate-700',
-    icon: <HelpCircle className="w-3.5 h-3.5 mr-1" />,
-    label: status,
+    container: 'bg-[#111827] text-[#94A3B8] border-[#253044]',
+    dot: 'bg-[#94A3B8]',
+    icon: <HelpCircle className="w-3 h-3 mr-1 text-[#94A3B8]" />,
+    label: status || 'Unknown',
   };
 
   if (isVerified) {
     config = {
-      bg: 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40',
-      icon: <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-400" />,
-      label: 'Verified',
+      container: 'bg-[#34D399]/10 text-[#34D399] border-[#34D399]/30',
+      dot: 'bg-[#34D399]',
+      icon: <CheckCircle2 className="w-3 h-3 mr-1 text-[#34D399]" />,
+      label: norm === 'COMPLETED' ? 'Completed' : norm === 'RECOVERABLE' ? 'Recoverable' : norm === 'HIGH' ? 'High Confidence' : 'Verified',
     };
   } else if (isInconclusive) {
     config = {
-      bg: 'bg-amber-950/80 text-amber-300 border-amber-500/40',
-      icon: <HelpCircle className="w-3.5 h-3.5 mr-1 text-amber-400" />,
-      label: 'Inconclusive',
+      container: 'bg-[#FBBF24]/10 text-[#FBBF24] border-[#FBBF24]/30',
+      dot: 'bg-[#FBBF24]',
+      icon: <HelpCircle className="w-3 h-3 mr-1 text-[#FBBF24]" />,
+      label: norm === 'RUNNING' ? 'Running' : norm === 'QUEUED' ? 'Queued' : norm === 'PARTIALLY_RECOVERABLE' ? 'Partially Recoverable' : 'Inconclusive',
     };
   } else if (isFailed) {
     config = {
-      bg: 'bg-red-950/80 text-red-300 border-red-500/40',
-      icon: <XCircle className="w-3.5 h-3.5 mr-1 text-red-400" />,
-      label: 'Failed',
+      container: 'bg-[#FB7185]/10 text-[#FB7185] border-[#FB7185]/30',
+      dot: 'bg-[#FB7185]',
+      icon: <XCircle className="w-3 h-3 mr-1 text-[#FB7185]" />,
+      label: norm === 'CORRUPTED' ? 'Corrupted' : norm === 'CANCELLED' ? 'Cancelled' : norm === 'INTEGRITY_FAILURE' ? 'Integrity Failure' : 'Failed',
     };
   } else if (isUnsupported) {
     config = {
-      bg: 'bg-purple-950/80 text-purple-300 border-purple-500/40',
-      icon: <AlertOctagon className="w-3.5 h-3.5 mr-1 text-purple-400" />,
-      label: 'Unsupported',
+      container: 'bg-[#A78BFA]/10 text-[#C4B5FD] border-[#A78BFA]/30',
+      dot: 'bg-[#A78BFA]',
+      icon: <AlertOctagon className="w-3 h-3 mr-1 text-[#A78BFA]" />,
+      label: norm === 'LOW' ? 'Low Confidence' : 'Unsupported',
     };
   } else if (isManualReview) {
     config = {
-      bg: 'bg-blue-950/80 text-blue-300 border-blue-500/40',
-      icon: <UserCheck className="w-3.5 h-3.5 mr-1 text-blue-400" />,
+      container: 'bg-[#22D3EE]/10 text-[#22D3EE] border-[#22D3EE]/30',
+      dot: 'bg-[#22D3EE]',
+      icon: <UserCheck className="w-3 h-3 mr-1 text-[#22D3EE]" />,
       label: 'Manual Review',
     };
   }
 
-  const px = size === 'sm' ? 'px-2.5 py-0.5 text-xs' : 'px-3 py-1 text-sm';
+  const padding = size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs';
 
   return (
-    <span className={`inline-flex items-center font-medium rounded-full border shadow-sm ${config.bg} ${px}`}>
+    <span
+      className={`inline-flex items-center font-medium font-mono border rounded-full ${config.container} ${padding} transition-colors select-none`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${config.dot} animate-pulse shrink-0`} />
       {config.icon}
       <span>{config.label}</span>
     </span>

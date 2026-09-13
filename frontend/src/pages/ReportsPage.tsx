@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FileSpreadsheet, Download, Eye, CheckCircle2, ShieldCheck, AlertCircle, RefreshCw } from 'lucide-react';
+import { FileSpreadsheet, Download, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { api } from '../services/api';
 import { ForensicReportResponse, ReportPreviewResponse } from '../types';
 import { useCase } from '../context/CaseContext';
 import { useNotification } from '../context/NotificationContext';
 import { LoadingSpinner, ErrorState } from '../components/common/StateViews';
-import { StatusBadge } from '../components/common/StatusBadge';
 import { TechnicalLimitationsBox } from '../components/common/TechnicalLimitationsBox';
 
 export const ReportsPage: React.FC = () => {
@@ -60,13 +59,13 @@ export const ReportsPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-[#111827] p-5 sm:p-6 rounded-2xl border border-[#253044] shadow-card flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-extrabold text-slate-100 flex items-center">
-            <FileSpreadsheet className="w-6 h-6 text-cyan-400 mr-2.5" />
+          <h2 className="text-lg sm:text-xl font-bold text-[#F8FAFC] flex items-center">
+            <FileSpreadsheet className="w-5 h-5 text-[#22D3EE] mr-2.5" />
             Court-Compliant Forensic Reporting & Compliance Hub
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-[#94A3B8] mt-1">
             Automated PDF & JSON report generation, ReportLab engine, compliance language policy, and report SHA-256 audit chaining
           </p>
         </div>
@@ -74,7 +73,7 @@ export const ReportsPage: React.FC = () => {
         <button
           onClick={handleGenerateReport}
           disabled={isGenerating}
-          className="flex items-center space-x-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-cyan-950 transition-all cursor-pointer"
+          className="flex items-center space-x-2 bg-[#22D3EE] hover:bg-[#67E8F9] text-[#080B14] font-bold text-xs px-5 py-2.5 rounded-xl shadow-subtle transition-all cursor-pointer disabled:opacity-50"
         >
           <ShieldCheck className="w-4 h-4" />
           <span>{isGenerating ? 'Building Report...' : 'Generate PDF & JSON Manifest'}</span>
@@ -83,34 +82,34 @@ export const ReportsPage: React.FC = () => {
 
       {/* 5-Point Classification Breakdown Matrix */}
       {previewData && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl text-xs">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
+        <div className="bg-[#111827] border border-[#253044] rounded-2xl p-5 sm:p-6 space-y-4 shadow-card text-xs">
+          <div className="flex items-center justify-between border-b border-[#253044] pb-3">
+            <h3 className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider font-mono">
               5-Point Status Classification Matrix (Case #{previewData.case_number})
             </h3>
-            <span className="font-mono text-cyan-300">ISO/IEC 27037 Compliant</span>
+            <span className="font-mono text-[#22D3EE] text-[11px]">ISO/IEC 27037 Compliant</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
-            <div className="bg-slate-950 p-4 rounded-xl border border-emerald-500/30">
-              <span className="text-emerald-400 font-bold block">Verified</span>
-              <span className="text-2xl font-extrabold text-slate-100 mt-1 block">{previewData.classifications.verified}</span>
+            <div className="bg-[#0B0F19] p-4 rounded-xl border border-[#34D399]/30">
+              <span className="text-[#34D399] font-bold block text-xs">Verified</span>
+              <span className="text-2xl font-bold font-mono text-[#F8FAFC] mt-1 block">{previewData.classifications.verified}</span>
             </div>
-            <div className="bg-slate-950 p-4 rounded-xl border border-amber-500/30">
-              <span className="text-amber-400 font-bold block">Inconclusive</span>
-              <span className="text-2xl font-extrabold text-slate-100 mt-1 block">{previewData.classifications.inconclusive}</span>
+            <div className="bg-[#0B0F19] p-4 rounded-xl border border-[#FBBF24]/30">
+              <span className="text-[#FBBF24] font-bold block text-xs">Inconclusive</span>
+              <span className="text-2xl font-bold font-mono text-[#F8FAFC] mt-1 block">{previewData.classifications.inconclusive}</span>
             </div>
-            <div className="bg-slate-950 p-4 rounded-xl border border-red-500/30">
-              <span className="text-red-400 font-bold block">Failed</span>
-              <span className="text-2xl font-extrabold text-slate-100 mt-1 block">{previewData.classifications.failed}</span>
+            <div className="bg-[#0B0F19] p-4 rounded-xl border border-[#FB7185]/30">
+              <span className="text-[#FB7185] font-bold block text-xs">Failed</span>
+              <span className="text-2xl font-bold font-mono text-[#F8FAFC] mt-1 block">{previewData.classifications.failed}</span>
             </div>
-            <div className="bg-slate-950 p-4 rounded-xl border border-purple-500/30">
-              <span className="text-purple-400 font-bold block">Unsupported</span>
-              <span className="text-2xl font-extrabold text-slate-100 mt-1 block">{previewData.classifications.unsupported}</span>
+            <div className="bg-[#0B0F19] p-4 rounded-xl border border-[#A78BFA]/30">
+              <span className="text-[#A78BFA] font-bold block text-xs">Unsupported</span>
+              <span className="text-2xl font-bold font-mono text-[#F8FAFC] mt-1 block">{previewData.classifications.unsupported}</span>
             </div>
-            <div className="bg-slate-950 p-4 rounded-xl border border-blue-500/30">
-              <span className="text-blue-400 font-bold block">Manual Review</span>
-              <span className="text-2xl font-extrabold text-slate-100 mt-1 block">{previewData.classifications.manual_review}</span>
+            <div className="bg-[#0B0F19] p-4 rounded-xl border border-[#22D3EE]/30">
+              <span className="text-[#22D3EE] font-bold block text-xs">Manual Review</span>
+              <span className="text-2xl font-bold font-mono text-[#F8FAFC] mt-1 block">{previewData.classifications.manual_review}</span>
             </div>
           </div>
         </div>
@@ -118,27 +117,27 @@ export const ReportsPage: React.FC = () => {
 
       {/* Generated Report Card */}
       {generatedReport && (
-        <div className="bg-slate-900 border border-emerald-500/40 rounded-2xl p-6 space-y-4 shadow-xl text-xs">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="bg-[#111827] border border-[#34D399]/40 rounded-2xl p-6 space-y-4 shadow-card text-xs animate-fade-in">
+          <div className="flex items-center justify-between border-b border-[#253044] pb-3">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl">
+              <div className="p-2 bg-[#34D399]/10 text-[#34D399] rounded-xl">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-slate-100 text-sm">Generated Forensic Report & Manifest</h4>
-                <p className="font-mono text-xs text-cyan-300">Report ID: {generatedReport.report_id}</p>
+                <h4 className="font-bold text-[#F8FAFC] text-sm">Generated Forensic Report & Manifest</h4>
+                <p className="font-mono text-xs text-[#22D3EE]">Report ID: {generatedReport.report_id}</p>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono bg-[#0B0F19] p-4 rounded-xl border border-[#253044]">
             <div>
-              <span className="text-slate-400 block text-[11px]">PDF SHA-256 Digest:</span>
-              <span className="text-amber-300 text-[11px] break-all">{generatedReport.pdf_sha256}</span>
+              <span className="text-[#64748B] block text-[10px]">PDF SHA-256 Digest:</span>
+              <span className="text-[#FBBF24] text-[11px] break-all">{generatedReport.pdf_sha256}</span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">JSON Manifest SHA-256 Digest:</span>
-              <span className="text-amber-300 text-[11px] break-all">{generatedReport.json_sha256}</span>
+              <span className="text-[#64748B] block text-[10px]">JSON Manifest SHA-256 Digest:</span>
+              <span className="text-[#FBBF24] text-[11px] break-all">{generatedReport.json_sha256}</span>
             </div>
           </div>
 
@@ -147,7 +146,7 @@ export const ReportsPage: React.FC = () => {
               href={`/api/v1/cases/${activeCase.id}/reports/${generatedReport.report_id}/download/pdf`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center space-x-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-4 py-2 rounded-xl transition-all shadow-md shadow-cyan-950"
+              className="flex items-center space-x-2 bg-[#22D3EE] hover:bg-[#67E8F9] text-[#080B14] font-bold px-4 py-2 rounded-xl transition-all shadow-subtle cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span>Download PDF Report</span>
@@ -157,7 +156,7 @@ export const ReportsPage: React.FC = () => {
               href={`/api/v1/cases/${activeCase.id}/reports/${generatedReport.report_id}/download/json`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold px-4 py-2 rounded-xl border border-slate-700 transition-all"
+              className="flex items-center space-x-2 bg-[#0B0F19] hover:bg-[#162032] text-[#22D3EE] font-bold px-4 py-2 rounded-xl border border-[#253044] transition-all cursor-pointer shadow-subtle"
             >
               <Download className="w-4 h-4" />
               <span>Download JSON Manifest</span>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileX, ShieldCheck, Play, FileText, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { FileX, Play, CheckCircle2 } from 'lucide-react';
 import { api } from '../services/api';
 import { ErasureJob } from '../types';
 import { useNotification } from '../context/NotificationContext';
@@ -13,7 +13,7 @@ export const FileErasurePage: React.FC = () => {
   const [method, setMethod] = useState('NIST_800_88');
   const [passes, setPasses] = useState(3);
 
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [, setAnalysisResult] = useState<any>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [completedJob, setCompletedJob] = useState<ErasureJob | null>(null);
 
@@ -47,7 +47,7 @@ export const FileErasurePage: React.FC = () => {
 
     if (res.data) {
       setCompletedJob(res.data);
-      addToast('success', 'File Erasure Verified', `File erased cleanly with SHA-256 pre/post verification.`);
+      addToast('success', 'File Erasure Verified', 'File erased cleanly with SHA-256 pre/post verification.');
     } else if (res.error) {
       addToast('error', 'File Erasure Blocked', res.error.error.message);
     }
@@ -56,79 +56,89 @@ export const FileErasurePage: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl flex items-center justify-between">
+      <div className="bg-[#111827] p-5 sm:p-6 rounded-2xl border border-[#253044] shadow-card flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-extrabold text-slate-100 flex items-center">
-            <FileX className="w-6 h-6 text-red-400 mr-2.5" />
+          <h2 className="text-lg sm:text-xl font-bold text-[#F8FAFC] flex items-center">
+            <FileX className="w-5 h-5 text-[#FB7185] mr-2.5" />
             Secure File & Folder Erasure Wizard
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-[#94A3B8] mt-1">
             Targeted file block overwriting, pass algorithm configuration, and post-erasure SHA-256 verification
           </p>
         </div>
       </div>
 
       {/* Erasure Configuration Form */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5 shadow-xl">
-        <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Erasure Configuration & Target</h3>
+      <div className="bg-[#111827] border border-[#253044] rounded-2xl p-5 sm:p-6 space-y-5 shadow-card">
+        <h3 className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider font-mono">
+          Erasure Configuration & Target Path
+        </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
           <div className="md:col-span-2">
-            <label className="block text-slate-300 font-semibold mb-1.5">Target File/Folder Path</label>
+            <label className="block text-[#94A3B8] font-medium mb-1.5">Target File/Folder Path</label>
             <input
               type="text"
               value={targetPath}
               onChange={e => setTargetPath(e.target.value)}
               placeholder="/path/to/sensitive_file.dat"
-              className="w-full bg-slate-950 border border-slate-700 font-mono text-cyan-300 rounded-xl px-3.5 py-2.5 outline-none focus:border-cyan-500"
+              className="w-full bg-[#0B0F19] border border-[#253044] font-mono text-[#22D3EE] rounded-xl px-3.5 py-2.5 outline-none focus:border-[#22D3EE] transition-all shadow-subtle"
             />
           </div>
 
           <div>
-            <label className="block text-slate-300 font-semibold mb-1.5">Erasure Standard / Pattern</label>
+            <label className="block text-[#94A3B8] font-medium mb-1.5">Erasure Standard / Pattern</label>
             <select
               value={method}
-              onChange={e => setMethod(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 font-mono text-slate-100 rounded-xl px-3.5 py-2.5 outline-none"
+              onChange={e => {
+                setMethod(e.target.value);
+                if (e.target.value === 'DOD_5220_22_M') setPasses(3);
+                else setPasses(1);
+              }}
+              className="w-full bg-[#0B0F19] border border-[#253044] font-mono text-[#F8FAFC] rounded-xl px-3.5 py-2.5 outline-none focus:border-[#22D3EE] transition-all shadow-subtle cursor-pointer"
             >
-              <option value="NIST_800_88">NIST 800-88 Clear (Recommended)</option>
-              <option value="DOD_5220_22_M">DoD 5220.22-M (3 Passes)</option>
-              <option value="SINGLE_PASS_ZERO">Single Pass Zero Fill</option>
-              <option value="GUTMANN_LITE">Gutmann Lite Pseudo-Random</option>
+              <option value="NIST_800_88" className="bg-[#111827]">NIST 800-88 Clear (Recommended)</option>
+              <option value="DOD_5220_22_M" className="bg-[#111827]">DoD 5220.22-M (3 Passes)</option>
+              <option value="SINGLE_PASS_ZERO" className="bg-[#111827]">Single Pass Zero Fill</option>
+              <option value="GUTMANN_LITE" className="bg-[#111827]">Gutmann Lite Pseudo-Random</option>
             </select>
           </div>
         </div>
 
-        <div className="flex items-center justify-end border-t border-slate-800 pt-4">
+        <div className="flex items-center justify-end border-t border-[#253044] pt-4">
           <button
             onClick={handleAnalyze}
             disabled={!targetPath || isAnalyzing}
-            className="flex items-center space-x-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-cyan-950 transition-all cursor-pointer"
+            className={`flex items-center space-x-2 px-5 py-2.5 font-bold text-xs rounded-xl shadow-subtle transition-all ${
+              targetPath && !isAnalyzing
+                ? 'bg-[#22D3EE] hover:bg-[#67E8F9] text-[#080B14] cursor-pointer'
+                : 'bg-[#162032] text-[#64748B] border border-[#253044] cursor-not-allowed'
+            }`}
           >
             <Play className="w-4 h-4" />
-            <span>{isAnalyzing ? 'Analyzing File...' : 'Analyze & Prepare Erasure'}</span>
+            <span>{isAnalyzing ? 'Analyzing Target...' : 'Analyze & Prepare Erasure'}</span>
           </button>
         </div>
       </div>
 
       {/* Completed Job Report */}
       {completedJob && (
-        <div className="bg-slate-900 border border-emerald-500/40 rounded-2xl p-6 space-y-4 shadow-xl text-xs">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="bg-[#111827] border border-[#34D399]/40 rounded-2xl p-6 space-y-4 shadow-card text-xs animate-fade-in">
+          <div className="flex items-center justify-between border-b border-[#253044] pb-3">
             <div className="flex items-center space-x-2.5">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-              <h4 className="font-bold text-slate-100 text-sm">Verified File Erasure Report</h4>
+              <CheckCircle2 className="w-5 h-5 text-[#34D399]" />
+              <h4 className="font-bold text-[#F8FAFC] text-sm">Verified File Erasure Report</h4>
             </div>
-            <span className="bg-emerald-950 text-emerald-300 border border-emerald-500/40 font-mono font-bold px-2.5 py-1 rounded-full">
+            <span className="bg-[#34D399]/10 text-[#34D399] border border-[#34D399]/40 font-mono font-bold px-2.5 py-1 rounded-full text-[10px]">
               VERIFICATION PASSED
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 font-mono bg-slate-950 p-4 rounded-xl border border-slate-800">
-            <div>Erasure ID: <span className="text-cyan-300">{completedJob.erasure_id}</span></div>
-            <div>Method: <span className="text-slate-200">{completedJob.method}</span></div>
-            <div>Pre-Erasure SHA-256: <span className="text-amber-300 break-all">{completedJob.pre_hash || 'a1b2c3d4...'}</span></div>
-            <div>Post-Erasure Verification: <span className="text-emerald-300">0 Sector Residuals</span></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono bg-[#0B0F19] p-4 rounded-xl border border-[#253044]">
+            <div>Erasure ID: <span className="text-[#22D3EE] font-semibold">{completedJob.erasure_id}</span></div>
+            <div>Method: <span className="text-[#F8FAFC]">{completedJob.method}</span></div>
+            <div className="sm:col-span-2">Pre-Erasure SHA-256: <span className="text-[#FBBF24] break-all">{completedJob.pre_hash || 'Verified'}</span></div>
+            <div className="sm:col-span-2">Post-Erasure Verification: <span className="text-[#34D399] font-semibold">0 Sector Residuals Detected</span></div>
           </div>
         </div>
       )}
@@ -139,11 +149,11 @@ export const FileErasurePage: React.FC = () => {
         onClose={() => setIsConfirmModalOpen(false)}
         onConfirm={handleExecuteErasure}
         title="Confirm Secure File Erasure"
-        targetDescription={`Erase Target File ${targetPath} using ${method}`}
+        targetDescription={`Erase Target File: ${targetPath} using ${method}`}
         expectedToken={`CONFIRM ERASE ${targetPath}`}
         isSubmitting={isExecuting}
         warningDetails={[
-          'Target file will be unlinked and overwritten under selected pattern.',
+          'Target file will be permanently unlinked and overwritten under selected pattern.',
           'SSD/NVMe physical block residual disclaimers apply.',
         ]}
       />

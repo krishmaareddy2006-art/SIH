@@ -1,0 +1,110 @@
+{
+  "dataset_name": "ForensicShield QA Ground-Truth Synthetic Dataset 01",
+  "image_file": "synthetic_test_disk_01.raw",
+  "image_size_bytes": 10485760,
+  "image_sha256": "effcb0dbb243905bd2c0a0251779311c88b9120106200b416f5b70e893872500",
+  "golden_entries": [
+    {
+      "target_id": "GT-001",
+      "filename": "valid_image.jpg",
+      "category": "VALID_FILE",
+      "expected_format": "JPEG",
+      "start_offset": 524288,
+      "end_offset": 524394,
+      "size_bytes": 106,
+      "sha256_hash": "03e6b5dd761135a9a49f49663513bf1e8b520f673c33b267a30505a63bbabae7",
+      "expected_confidence": "HIGH",
+      "should_validate": true
+    },
+    {
+      "target_id": "GT-002",
+      "filename": "valid_graphic.png",
+      "category": "VALID_FILE",
+      "expected_format": "PNG",
+      "start_offset": 1048576,
+      "end_offset": 1048645,
+      "size_bytes": 69,
+      "sha256_hash": "b1ff9c8ea3a780bad09b346c423d2d0e46815926879b18e841d928376a946640",
+      "expected_confidence": "HIGH",
+      "should_validate": true
+    },
+    {
+      "target_id": "GT-003",
+      "filename": "court_document.pdf",
+      "category": "VALID_FILE",
+      "expected_format": "PDF",
+      "start_offset": 2097152,
+      "end_offset": 2097474,
+      "size_bytes": 322,
+      "sha256_hash": "ce892f9b0281899af891405bc9b5dc9fbf03f14335a4c069189bd88969c9ad85",
+      "expected_confidence": "HIGH",
+      "should_validate": true
+    },
+    {
+      "target_id": "GT-004",
+      "filename": "evidence_archive.zip",
+      "category": "VALID_FILE",
+      "expected_format": "ZIP",
+      "start_offset": 3145728,
+      "end_offset": 3146040,
+      "size_bytes": 312,
+      "sha256_hash": "3b9e3ab4ff01111b89bb39b25a80f85b98a2fba6498775f9ff1e61496d6356b2",
+      "expected_confidence": "HIGH",
+      "should_validate": true
+    },
+    {
+      "target_id": "GT-005",
+      "filename": "renamed_photo.txt",
+      "category": "RENAMED_FILE",
+      "expected_format": "JPEG",
+      "start_offset": 4194304,
+      "end_offset": 4194410,
+      "size_bytes": 106,
+      "sha256_hash": "03e6b5dd761135a9a49f49663513bf1e8b520f673c33b267a30505a63bbabae7",
+      "expected_confidence": "HIGH",
+      "should_validate": true
+    },
+    {
+      "target_id": "GT-006",
+      "filename": "duplicate_copy.jpg",
+      "category": "DUPLICATE_FILE",
+      "expected_format": "JPEG",
+      "start_offset": 5242880,
+      "end_offset": 5242986,
+      "size_bytes": 106,
+      "sha256_hash": "03e6b5dd761135a9a49f49663513bf1e8b520f673c33b267a30505a63bbabae7",
+      "expected_confidence": "HIGH",
+      "should_validate": true
+    },
+    {
+      "target_id": "GT-007",
+      "filename": "truncated_photo.jpg",
+      "category": "TRUNCATED_FILE",
+      "expected_format": "JPEG",
+      "start_offset": 6291456,
+      "end_offset": 6291560,
+      "size_bytes": 104,
+      "sha256_hash": "5e8dec19e0f97f726cb23065b9e99b4c96df7fdae9d720d237cc206d8adbd56f",
+      "expected_confidence": "LOW",
+      "should_validate": false
+    },
+    {
+      "target_id": "GT-008",
+      "filename": "corrupted_graphic.png",
+      "category": "CORRUPTED_FILE",
+      "expected_format": "PNG",
+      "start_offset": 7340032,
+      "end_offset": 7340101,
+      "size_bytes": 69,
+      "sha256_hash": "a05e564ab0a8db316cd6c1cd73b6a6abc2c6f83d4db8d8f57f2309784c6d75c3",
+      "expected_confidence": "LOW",
+      "should_validate": false
+    }
+  ],
+  "summary": {
+    "total_entries": 8,
+    "valid_entries": 6,
+    "corrupted_entries": 2,
+    "duplicate_entries": 1
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "report_metadata": {
+    "report_id": "RPT-20260913-DA66F4BC",
+    "case_id": 1,
+    "case_number": "CAS-SIH-2026-001",
+    "case_title": "Smart India Hackathon 2026 Demonstration Case",
+    "generated_at": "2026-09-13T13:11:36.370563+00:00",
+    "generated_by": "admin",
+    "tool_version": "ForensicShield v1.0.0",
+    "environment": "development"
+  },
+  "summary_statistics": {
+    "evidence_count": 1,
+    "total_evidence_bytes": 10485760,
+    "carved_artifacts_count": 5,
+    "recovered_artifacts_count": 0,
+    "audit_events_count": 13,
+    "audit_chain_status": "INTACT"
+  },
+  "status_classifications": {
+    "verified": 4,
+    "inconclusive": 1,
+    "failed": 0,
+    "unsupported": 0,
+    "manual_review": 1
+  },
+  "evidence_inventory": [
+    {
+      "evidence_id": "EVD-SIH-DISK-01",
+      "item_number": "ITEM-001",
+      "original_name": "synthetic_test_disk_01.raw",
+      "size_bytes": 10485760,
+      "sha256": "effcb0dbb243905bd2c0a0251779311c88b9120106200b416f5b70e893872500",
+      "import_time": "2026-09-13T13:04:55.401067",
+      "status": "VERIFIED"
+    }
+  ],
+  "recovered_artifacts": [],
+  "carved_artifacts": [
+    {
+      "carved_id": "CARV-JPEG-001",
+      "format": "JPEG",
+      "carved_hash": "hash_carv-jpeg-001_sha256_mock_001",
+      "start_offset": 10240,
+      "end_offset": 117820,
+      "confidence_level": "HIGH",
+      "validation_details": "Valid JPEG SOI, EOI, and EXIF metadata verified"
+    },
+    {
+      "carved_id": "CARV-PNG-001",
+      "format": "PNG",
+      "carved_hash": "hash_carv-png-001_sha256_mock_001",
+      "start_offset": 150000,
+      "end_offset": 248000,
+      "confidence_level": "HIGH",
+      "validation_details": "Valid 8-byte PNG magic, IHDR, and IEND footer verified"
+    },
+    {
+      "carved_id": "CARV-PDF-001",
+      "format": "PDF",
+      "carved_hash": "hash_carv-pdf-001_sha256_mock_001",
+      "start_offset": 300000,
+      "end_offset": 385000,
+      "confidence_level": "HIGH",
+      "validation_details": "Valid %PDF- header, Catalog structure, and %%EOF verified"
+    },
+    {
+      "carved_id": "CARV-ZIP-001",
+      "format": "ZIP",
+      "carved_hash": "hash_carv-zip-001_sha256_mock_001",
+      "start_offset": 500000,
+      "end_offset": 620000,
+      "confidence_level": "HIGH",
+      "validation_details": "Valid PK\\x03\\x04 header, Central Directory, and EOCD verified"
+    },
+    {
+      "carved_id": "CARV-JPEG-TRUNC",
+      "format": "JPEG",
+      "carved_hash": "hash_carv-jpeg-trunc_sha256_mock_001",
+      "start_offset": 800000,
+      "end_offset": 825000,
+      "confidence_level": "LOW",
+      "validation_details": "Valid JPEG SOI found, missing EOI footer marker (truncated file)"
+    }
+  ],
+  "audit_chain_verification": {
+    "is_valid": true,
+    "total_events": 13,
+    "chain_status": "INTACT",
+    "first_broken_event_id": null
+  }
+}

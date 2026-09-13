@@ -1,0 +1,36 @@
+{
+  "report_metadata": {
+    "report_id": "RPT-20260913-84BD83ED",
+    "case_id": 2,
+    "case_number": "CAS-RPT-002",
+    "case_title": "PDF & JSON Build Test Case",
+    "generated_at": "2026-09-13T08:12:37.863874+00:00",
+    "generated_by": "test_operator",
+    "tool_version": "ForensicShield v1.0.0",
+    "environment": "development"
+  },
+  "summary_statistics": {
+    "evidence_count": 0,
+    "total_evidence_bytes": 0,
+    "carved_artifacts_count": 0,
+    "recovered_artifacts_count": 0,
+    "audit_events_count": 0,
+    "audit_chain_status": "INTACT"
+  },
+  "status_classifications": {
+    "verified": 0,
+    "inconclusive": 0,
+    "failed": 0,
+    "unsupported": 0,
+    "manual_review": 0
+  },
+  "evidence_inventory": [],
+  "recovered_artifacts": [],
+  "carved_artifacts": [],
+  "audit_chain_verification": {
+    "is_valid": true,
+    "total_events": 0,
+    "chain_status": "INTACT",
+    "first_broken_event_id": null
+  }
+}

@@ -1,0 +1,70 @@
+name: ForensicShield CI & QA Validation Framework
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  backend-qa-and-benchmarks:
+    name: Backend Test Suite & Accuracy Benchmarking
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Backend Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov reportlab sqlalchemy pydantic passlib python-jose
+
+      - name: Run Backend Unit & Security Test Suites
+        run: |
+          python -m pytest tests/test_job_management.py \
+                            tests/test_blockchain_notarization.py \
+                            tests/test_tamper_evident_audit.py \
+                            tests/test_recovery_validation.py \
+                            tests/test_file_carving.py \
+                            tests/test_forensic_reporting.py \
+                            tests/test_qa_safety_and_tampering.py \
+                            tests/test_qa_fuzzing_and_resilience.py \
+                            -v -W ignore
+
+      - name: Generate Synthetic Dataset & Run QA Benchmark Engine
+        run: |
+          python -m tests.qa_framework.benchmark_runner
+
+      - name: Upload QA Accuracy & Benchmark Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-accuracy-and-benchmark-report
+          path: docs/QA_ACCURACY_AND_BENCHMARK_REPORT.md
+
+  frontend-build-and-component-tests:
+    name: Frontend React Build & Quality Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package.json
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run Vite React Production Build
+        working-directory: ./frontend
+        run: npm run build

@@ -172,8 +172,11 @@ export const RecoveryWorkspacePage: React.FC = () => {
       {/* Carved Artifacts Table */}
       {carvedList.length > 0 && (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-          <div className="p-4 border-b border-slate-800 text-xs text-slate-400 font-semibold uppercase tracking-wider">
-            Carved File Artifacts ({carvedList.length})
+          <div className="p-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 font-semibold uppercase tracking-wider">
+            <span>Carved File Artifacts ({carvedList.length})</span>
+            <span className="font-mono text-[11px] text-cyan-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 normal-case">
+              📁 Saved to: <span className="text-slate-200 font-semibold">tests/qa_framework/golden_manifests/carved_output/case_1</span>
+            </span>
           </div>
 
           <div className="overflow-x-auto">
@@ -185,6 +188,7 @@ export const RecoveryWorkspacePage: React.FC = () => {
                   <th className="p-3">Offsets</th>
                   <th className="p-3">Carved SHA-256</th>
                   <th className="p-3">Confidence</th>
+                  <th className="p-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/80">
@@ -195,6 +199,18 @@ export const RecoveryWorkspacePage: React.FC = () => {
                     <td className="p-3 text-slate-400">{ca.source_start_offset} - {ca.source_end_offset}</td>
                     <td className="p-3 text-amber-300 text-[11px]">{ca.carved_file_hash.substring(0, 16)}...</td>
                     <td className="p-3"><StatusBadge status={ca.confidence_level} /></td>
+                    <td className="p-3 text-right">
+                      <a
+                        href={`http://127.0.0.1:8000/api/v1/carving/${ca.carved_id}/download`}
+                        download
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center space-x-1 bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-500/40 px-2.5 py-1 rounded-lg transition-all font-sans font-semibold text-xs"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Download</span>
+                      </a>
+                    </td>
                   </tr>
                 ))}
               </tbody>

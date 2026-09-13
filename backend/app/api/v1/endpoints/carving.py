@@ -78,3 +78,22 @@ async def list_carved_artifacts(
 ):
     """Lists all carved file artifacts attached to an accessible case context. (IDOR Protected)."""
     return db.query(CarvedFileArtifact).filter(CarvedFileArtifact.case_id == case.id).all()
+
+
+@router.get("/carving/{carved_id}/download")
+async def download_carved_artifact(
+    carved_id: str,
+    db: Session = Depends(get_db),
+):
+    """Downloads the physical extracted carved file."""
+    import os
+    from fastapi.responses import FileResponse
+    from app.core.exceptions import ForensicShieldException
+
+    artifact = db.query(CarvedFileArtifact).filter(CarvedFileArtifact.carved_id == carved_id).first()
+    if not artifact or not artifact.output_file_path or not os.path.exists(artifact.output_file_path):
+        raise ForensicShieldException("Carved file not found on disk", code="FILE_NOT_FOUND", status_code=404)
+
+    filename = os.path.basename(artifact.output_file_path)
+    return FileResponse(path=artifact.output_file_path, filename=filename)
+

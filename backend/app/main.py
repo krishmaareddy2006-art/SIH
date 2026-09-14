@@ -7,8 +7,8 @@ API v1 versioned routing, and database tables.
 
 import uuid
 import time
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from typing import AsyncGenerator, Callable, Awaitable, Dict, Any
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 
@@ -29,7 +29,7 @@ setup_logging(settings.LOG_LEVEL)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Initialize SQLite database schema and seed default roles/users
     db = SessionLocal()
     try:
@@ -77,11 +77,11 @@ app.add_middleware(
 )
 
 
-
-
 # Context Tracking & Audit Middleware
 @app.middleware("http")
-async def context_audit_middleware(request: Request, call_next):
+async def context_audit_middleware(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     # Generate or extract request correlation ID
     request_id = request.headers.get("X-Request-ID") or f"req-{uuid.uuid4().hex[:12]}"
     request.state.request_id = request_id
@@ -125,7 +125,7 @@ app.include_router(api_v1_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/", tags=["Root"])
-async def root():
+async def root() -> Dict[str, Any]:
     """Root endpoint welcoming visitors and linking to OpenAPI documentation."""
     return {
         "project": settings.PROJECT_NAME,
@@ -134,6 +134,7 @@ async def root():
         "documentation": f"{settings.API_V1_STR}/docs",
         "health_check": f"{settings.API_V1_STR}/health",
     }
+
 
 
 

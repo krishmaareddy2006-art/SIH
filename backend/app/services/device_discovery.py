@@ -157,7 +157,7 @@ def format_bytes_human(size_bytes: int) -> str:
     if size_bytes <= 0:
         return "0 B"
     units = ["B", "KB", "MB", "GB", "TB", "PB"]
-    digit_groups = int(math.floor(math.log(size_bytes, 1024)))
+    digit_groups = math.floor(math.log(size_bytes, 1024))
     digit_groups = min(digit_groups, len(units) - 1)
     size = round(size_bytes / (1024 ** digit_groups), 2)
     return f"{size} {units[digit_groups]}"
@@ -166,7 +166,7 @@ def format_bytes_human(size_bytes: int) -> str:
 class DeviceDiscoveryService:
     """Service providing read-only, platform-aware block device discovery on Linux."""
 
-    def __init__(self, platform_override: Optional[str] = None):
+    def __init__(self, platform_override: Optional[str] = None) -> None:
         self.platform = platform_override or sys.platform
 
     def _discover_windows_devices(self, scan_time: str) -> DeviceDiscoveryResponse:

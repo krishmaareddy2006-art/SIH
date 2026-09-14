@@ -5,7 +5,7 @@ import sys
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
@@ -30,8 +30,8 @@ from app.services.recovery_adapters.ntfs_adapter import NTFSFilesystemAdapter
 from app.services.recovery_adapters.unsupported_adapter import UnsupportedFilesystemAdapter
 
 REGISTERED_ADAPTERS: List[BaseFilesystemAdapter] = [
-    FAT32FilesystemAdapter(),
     NTFSFilesystemAdapter(),
+    FAT32FilesystemAdapter(),
     Ext4FilesystemAdapter(),
 ]
 
@@ -40,7 +40,7 @@ class FilesystemRecoveryService:
     """High-level service executing read-only evidence recovery and provenance tracking."""
 
     @staticmethod
-    def select_adapter(file_handle, image_size: int) -> Tuple[BaseFilesystemAdapter, str, Dict]:
+    def select_adapter(file_handle: Any, image_size: int) -> Tuple[BaseFilesystemAdapter, str, Dict[str, Any]]:
         """Scans image headers to select matching filesystem adapter or returns Unsupported fallback."""
         for adapter in REGISTERED_ADAPTERS:
             is_detected, fs_name, meta = adapter.detect(file_handle, image_size)
@@ -59,7 +59,7 @@ class FilesystemRecoveryService:
         operator_username: str,
         check_cancelled: Optional[Callable[[], bool]] = None,
     ) -> RecoveryScanResponse:
-        """
+        r"""
         Executes read-only deleted file recovery scan on a physical or logical storage device (e.g. E:\ or /dev/sdb).
         Scans filesystem allocation tables, directory records, and $RECYCLE.BIN forensic artifacts.
         """

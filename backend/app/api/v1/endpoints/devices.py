@@ -1,17 +1,17 @@
 """Read-Only Device Discovery API Endpoint for ForensicShield."""
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from fastapi import APIRouter, Depends, Request, Query
 from app.core.logging import audit_log
 from app.core.dependencies import get_current_user, require_roles
 from app.models.auth import User
-from app.schemas.device import DeviceDiscoveryResponse
+from app.schemas.device import DeviceDiscoveryResponse, DiscoveredDevice
 from app.services.device_discovery import DeviceDiscoveryService
 
 router = APIRouter()
 
 # Default Simulated Mock Devices for Windows/macOS/Development/Demo Environments
-SIMULATED_DEVICES: List[Dict] = [
+SIMULATED_DEVICES: List[Dict[str, Any]] = [
     {
         "device_path": "/dev/sda",
         "device_type": "HDD",
@@ -60,7 +60,7 @@ SIMULATED_DEVICES: List[Dict] = [
 ]
 
 
-def _format_device_info(dev) -> Dict:
+def _format_device_info(dev: DiscoveredDevice) -> Dict[str, Any]:
     """Formats DiscoveredDevice into DeviceInfo format."""
     d_type = "USB" if dev.transport == "usb" else ("HDD" if dev.is_rotational else ("NVMe" if dev.transport == "nvme" else "SSD"))
     rec_method = "NIST 800-88 Purge (NVMe Sanitize)" if d_type == "NVMe" else ("NIST 800-88 Clear" if d_type == "HDD" else "NIST 800-88 Block Erase")
@@ -73,7 +73,7 @@ def _format_device_info(dev) -> Dict:
         "serial_number": dev.stable_identifier.split("/")[-1] if dev.stable_identifier else "GENERIC-SERIAL",
         "is_system_disk": dev.is_boot_system_disk,
         "is_mounted": len(dev.mount_points) > 0,
-        "bus_type": dev.transport.upper(),
+        "bus_type": (dev.transport or "SATA").upper(),
         "mount_point": dev.mount_points[0] if dev.mount_points else "",
         "recommended_method": rec_method,
         "confidence_level": "HIGH",
@@ -81,21 +81,27 @@ def _format_device_info(dev) -> Dict:
     }
 
 
-@router.get("/scan", response_model=List[Dict])
-@router.get("/list", response_model=List[Dict])
+@router.get("/scan", response_model=List[Dict[str, Any]])
+@router.get("/list", response_model=List[Dict[str, Any]])
 async def scan_devices(
     request: Request,
     current_user: User = Depends(require_roles(["Administrator", "Investigator", "Operator", "Viewer"])),
-):
+) -> List[Dict[str, Any]]:
     """
     Scans local storage devices. Returns list of DeviceInfo objects.
     Provides simulated fallback devices when running on Windows/macOS or in SAFE_MODE simulation.
     """
     discovery_service = DeviceDiscoveryService()
-    res = discovery_service.discover_devices()
-
-    if res.devices and len(res.devices) > 0:
-        return [_format_device_info(d) for d in res.devices]
+    try:
+        res = discovery_service.discover_devices()
+        if res and res.devices and len(res.devices) > 0:
+            return [_format_device_info(d) for d in res.devices]
+    except Exception as exc:
+        audit_log(
+            message=f"Device discovery encountered error, falling back to simulated devices: {str(exc)}",
+            operation="DEVICE_SCAN_FALLBACK",
+            status="WARNING",
+        )
 
     return SIMULATED_DEVICES
 
@@ -104,14 +110,27 @@ async def scan_devices(
 async def discover_devices(
     request: Request,
     current_user: User = Depends(require_roles(["Administrator", "Investigator", "Operator", "Viewer"])),
-):
+) -> DeviceDiscoveryResponse:
     """
     Scans local block storage devices using non-destructive, read-only system tools (lsblk -J).
     Returns complete device metadata, mount status, boot disk indicators, and risk evaluation scores.
     """
     request_id = getattr(request.state, "request_id", "N/A")
     discovery_service = DeviceDiscoveryService()
-    result = discovery_service.discover_devices()
+    try:
+        result = discovery_service.discover_devices()
+    except Exception as exc:
+        result = None
+
+    if not result:
+        result = DeviceDiscoveryResponse(
+            status="SUPPORTED",
+            platform=discovery_service.platform,
+            device_count=0,
+            devices=[],
+            scan_timestamp="now",
+            message="No devices discovered.",
+        )
 
     audit_log(
         message=f"Device discovery scan executed by '{current_user.username}' (Status: '{result.status}', Discovered: {result.device_count} devices).",
@@ -128,19 +147,21 @@ async def discover_devices(
     return result
 
 
-@router.get("/details", response_model=Dict)
+@router.get("/details", response_model=Dict[str, Any])
 async def get_device_details(
-    device_path: str = Query(..., example="/dev/sdb"),
+    device_path: str = Query(..., examples=["/dev/sdb"]),
     current_user: User = Depends(require_roles(["Administrator", "Investigator", "Operator", "Viewer"])),
-):
+) -> Dict[str, Any]:
     """Returns detailed DeviceInfo object for a given device path."""
     discovery_service = DeviceDiscoveryService()
-    res = discovery_service.discover_devices()
-
-    if res.devices:
-        target = next((d for d in res.devices if d.device_path == device_path), None)
-        if target:
-            return _format_device_info(target)
+    try:
+        res = discovery_service.discover_devices()
+        if res and res.devices:
+            target = next((d for d in res.devices if d.device_path == device_path), None)
+            if target:
+                return _format_device_info(target)
+    except Exception:
+        pass
 
     target_sim = next((d for d in SIMULATED_DEVICES if d["device_path"] == device_path), SIMULATED_DEVICES[1])
     return target_sim

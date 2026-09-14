@@ -169,24 +169,6 @@ class DeviceDiscoveryService:
     def __init__(self, platform_override: Optional[str] = None):
         self.platform = platform_override or sys.platform
 
-    def discover_devices(self) -> DeviceDiscoveryResponse:
-        """Discovers local block devices and evaluates forensic risk."""
-        scan_time = datetime.now(timezone.utc).isoformat()
-
-        # 1. Platform Check Guard - Call Win32 live drive scanner on Windows
-        if self.platform == "win32":
-            return self._discover_windows_devices(scan_time)
-
-        if self.platform != "linux":
-            return DeviceDiscoveryResponse(
-                status="UNSUPPORTED",
-                platform=self.platform,
-                device_count=0,
-                devices=[],
-                scan_timestamp=scan_time,
-                message=f"Device discovery service supported on Linux and Windows platforms. Current platform '{self.platform}' is unsupported.",
-            )
-
     def _discover_windows_devices(self, scan_time: str) -> DeviceDiscoveryResponse:
         """Scans live attached Windows storage drives & USB flash drives via Win32 Kernel APIs."""
         import ctypes
@@ -272,6 +254,24 @@ class DeviceDiscoveryService:
             scan_timestamp=scan_time,
             message=f"Discovered {len(discovered_devices)} live Windows storage drives.",
         )
+
+    def discover_devices(self) -> DeviceDiscoveryResponse:
+        """Discovers local block devices and evaluates forensic risk."""
+        scan_time = datetime.now(timezone.utc).isoformat()
+
+        # 1. Platform Check Guard - Call Win32 live drive scanner on Windows
+        if self.platform == "win32":
+            return self._discover_windows_devices(scan_time)
+
+        if self.platform != "linux":
+            return DeviceDiscoveryResponse(
+                status="UNSUPPORTED",
+                platform=self.platform,
+                device_count=0,
+                devices=[],
+                scan_timestamp=scan_time,
+                message=f"Device discovery service supported on Linux and Windows platforms. Current platform '{self.platform}' is unsupported.",
+            )
 
         # 2. Collect System Mounts and Swap Information
         active_mounts = SystemMountParser.get_active_mounts()

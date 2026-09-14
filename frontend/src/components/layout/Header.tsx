@@ -88,8 +88,9 @@ export const Header: React.FC<HeaderProps> = ({ onLoginClick, onToggleMobileSide
               {user.username.substring(0, 2).toUpperCase()}
             </div>
             <div className="hidden sm:block leading-tight">
-              <p className="font-semibold text-[#F8FAFC] text-xs">{user.username}</p>
-              <p className="text-[10px] text-[#FBBF24] font-mono">{user.role?.name || 'Operator'}</p>
+              <p className="text-[10px] text-[#FBBF24] font-mono">
+                {typeof user.role === 'object' && user.role !== null ? user.role.name : (user.role || 'Operator')}
+              </p>
             </div>
             <button
               onClick={logout}

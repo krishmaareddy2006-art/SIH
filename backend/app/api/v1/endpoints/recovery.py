@@ -1,10 +1,11 @@
-"""Forensic Filesystem Recovery API Endpoints with IDOR & RBAC Controls."""
-
+import os
 from typing import List
 from fastapi import APIRouter, Depends, Request, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.exceptions import ForensicShieldException
 from app.core.logging import audit_log
 from app.core.dependencies import (
     get_current_user,
@@ -39,25 +40,33 @@ async def scan_filesystem_recovery(
     db: Session = Depends(get_db),
 ):
     """
-    Executes read-only filesystem-aware recovery scan:
-    1. Performs pre-scan SHA-256 evidence verification.
-    2. Opens evidence image in binary read-only ('rb') mode.
-    3. Detects filesystem signature and parses candidate deleted entries.
-    4. Validates offset bounds and classifies candidates.
-    5. Performs post-scan SHA-256 evidence verification.
+    Executes read-only filesystem-aware recovery scan on evidence image or storage device:
+    1. Detects filesystem signature and parses candidate deleted entries.
+    2. Validates offset bounds and classifies candidates.
+    3. Performs verification and provenance auditing.
     (IDOR & RBAC Protected).
     """
     request_id = getattr(request.state, "request_id", "N/A")
 
-    scan_response = recovery_service.scan_evidence_recovery(
-        db=db,
-        case_id=case.id,
-        evidence_id=scan_req.evidence_id,
-        operator_username=current_user.username,
-    )
+    if scan_req.device_path:
+        scan_response = recovery_service.scan_device_recovery(
+            db=db,
+            case_id=case.id,
+            device_path=scan_req.device_path,
+            operator_username=current_user.username,
+        )
+        target_name = scan_req.device_path
+    else:
+        scan_response = recovery_service.scan_evidence_recovery(
+            db=db,
+            case_id=case.id,
+            evidence_id=scan_req.evidence_id,
+            operator_username=current_user.username,
+        )
+        target_name = scan_req.evidence_id
 
     audit_log(
-        message=f"Filesystem recovery scan executed on evidence '{scan_req.evidence_id}' for Case #{case.case_number} by '{current_user.username}'.",
+        message=f"Filesystem recovery scan executed on '{target_name}' for Case #{case.case_number} by '{current_user.username}'.",
         operation="RECOVERY_SCAN_API",
         status="SUCCESS",
         request_id=request_id,
@@ -93,8 +102,9 @@ async def extract_recovery_artifacts(
         operator_username=current_user.username,
     )
 
+    target_name = extract_req.device_path or extract_req.evidence_id
     audit_log(
-        message=f"Extracted {job_response.successfully_extracted} artifacts from evidence '{extract_req.evidence_id}' into output folder.",
+        message=f"Extracted {job_response.successfully_extracted} artifacts from target '{target_name}' into output folder.",
         operation="RECOVERY_EXTRACT_API",
         status="SUCCESS",
         request_id=request_id,
@@ -115,4 +125,26 @@ async def list_recovered_artifacts(
     db: Session = Depends(get_db),
 ):
     """Lists all recovered artifacts attached to an accessible case context. (IDOR Protected)."""
-    return db.query(RecoveredArtifact).filter(RecoveredArtifact.case_id == case.id).all()
+    artifacts = db.query(RecoveredArtifact).filter(RecoveredArtifact.case_id == case.id).all()
+    results = []
+    for a in artifacts:
+        resp = ExtractedArtifactResponse.model_validate(a)
+        resp.download_url = f"/api/v1/recovery/{a.artifact_id}/download"
+        results.append(resp)
+    return results
+
+
+@router.get("/cases/{case_id}/recovery/artifacts/{artifact_id}/download")
+@router.get("/recovery/{artifact_id}/download")
+async def download_recovered_artifact(
+    artifact_id: str,
+    db: Session = Depends(get_db),
+) -> FileResponse:
+    """Downloads the physical extracted recovered file."""
+    artifact = db.query(RecoveredArtifact).filter(RecoveredArtifact.artifact_id == artifact_id).first()
+    if not artifact or not artifact.output_file_path or not os.path.exists(artifact.output_file_path):
+        raise ForensicShieldException("Recovered file not found on disk", code="FILE_NOT_FOUND", status_code=404)
+
+    filename = os.path.basename(artifact.original_path) if artifact.original_path else os.path.basename(artifact.output_file_path)
+    return FileResponse(path=artifact.output_file_path, filename=filename)
+

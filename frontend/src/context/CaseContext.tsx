@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ForensicCase } from '../types';
 import { api } from '../services/api';
 
+import { useAuth } from './AuthContext';
+
 interface CaseContextType {
   cases: ForensicCase[];
   activeCase: ForensicCase | null;
@@ -13,6 +15,7 @@ interface CaseContextType {
 const CaseContext = createContext<CaseContextType | undefined>(undefined);
 
 export const CaseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
   const [cases, setCases] = useState<ForensicCase[]>([]);
   const [activeCase, setActiveCase] = useState<ForensicCase | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -21,20 +24,28 @@ export const CaseProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     const res = await api.listCases();
     if (res.data) {
-      setCases(res.data);
-      if (!activeCase && res.data.length > 0) {
-        setActiveCase(res.data[0]);
-      } else if (activeCase) {
-        const updated = res.data.find(c => c.id === activeCase.id);
-        if (updated) setActiveCase(updated);
-      }
+      const caseList = res.data;
+      setCases(caseList);
+      setActiveCase(prev => {
+        if (!prev && caseList.length > 0) return caseList[0];
+        if (prev) {
+          const updated = caseList.find(c => c.id === prev.id);
+          return updated || caseList[0] || null;
+        }
+        return null;
+      });
     }
     setIsLoading(false);
   };
 
   useEffect(() => {
-    refreshCases();
-  }, []);
+    if (isAuthenticated) {
+      refreshCases();
+    } else {
+      setCases([]);
+      setActiveCase(null);
+    }
+  }, [isAuthenticated]);
 
   const setActiveCaseId = (caseId: number) => {
     const found = cases.find(c => c.id === caseId);

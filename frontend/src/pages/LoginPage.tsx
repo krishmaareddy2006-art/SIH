@@ -18,15 +18,32 @@ export const LoginPage: React.FC<{ onSuccess?: () => void }> = ({ onSuccess }) =
     setError('');
     setIsSubmitting(true);
 
-    const res = await api.login(username, password);
-    setIsSubmitting(false);
+    try {
+      const res = await api.login(username, password);
+      setIsSubmitting(false);
 
-    if (res.data) {
-      login(res.data.access_token, res.data.user);
-      addToast('success', 'Authentication Successful', `Welcome back, ${res.data.user.username}`);
-      if (onSuccess) onSuccess();
-    } else if (res.error) {
-      setError(res.error.error.message || 'Invalid credentials.');
+      if (res.data) {
+        const usernameStr = res.data.user?.username || res.data.username || username;
+        const userObj = res.data.user || {
+          id: (res.data as any).id || 1,
+          username: usernameStr,
+          email: (res.data as any).email || `${usernameStr}@forensicshield.local`,
+          role: res.data.role || 'Operator',
+          permissions: res.data.permissions || [],
+          is_active: true,
+        };
+
+        login(res.data.access_token, userObj);
+        addToast('success', 'Authentication Successful', `Welcome back, ${usernameStr}`);
+        if (onSuccess) {
+          onSuccess();
+        }
+      } else if (res.error) {
+        setError(res.error.error?.message || 'Invalid username or password.');
+      }
+    } catch (err: any) {
+      setIsSubmitting(false);
+      setError(err?.message || 'Authentication error. Please check credentials.');
     }
   };
 

@@ -168,6 +168,14 @@ async def global_unhandled_exception_handler(
         },
     )
 
+    try:
+        with open("server_errors.log", "a", encoding="utf-8") as err_f:
+            err_f.write(f"[{datetime.now(timezone.utc).isoformat()}] {request.method} {request.url.path} - {type(exc).__name__}: {str(exc)}\n")
+            import traceback
+            traceback.print_exc(file=err_f)
+    except Exception:
+        pass
+
     headers = {
         "Access-Control-Allow-Origin": request.headers.get("origin") or "*",
         "Access-Control-Allow-Credentials": "true",
@@ -175,13 +183,16 @@ async def global_unhandled_exception_handler(
         "Access-Control-Allow-Headers": "*",
     }
 
-    # Return safe, non-leaking message to API client
+    # Return safe, informative message
+    from app.core.config import settings
+    detail_msg = f"{type(exc).__name__}: {str(exc)}" if settings.ENVIRONMENT == "development" else "An unexpected system error occurred. System administrators have been notified."
+
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         headers=headers,
         content=make_safe_error_payload(
             code="INTERNAL_SERVER_ERROR",
-            message="An unexpected system error occurred. System administrators have been notified.",
+            message=detail_msg,
             request_id=request_id,
         ),
     )

@@ -76,6 +76,15 @@ async def login(
         user_id=user.username,
     )
 
+    user_profile = UserProfileResponse(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        role=user.role.name,
+        permissions=permissions,
+        is_active=user.is_active,
+    )
+
     return TokenResponse(
         access_token=access_token,
         token_type="bearer",
@@ -83,6 +92,7 @@ async def login(
         username=user.username,
         role=user.role.name,
         permissions=permissions,
+        user=user_profile,
     )
 
 

@@ -3,23 +3,30 @@
  * Matches backend FastAPI / Pydantic models & API specifications.
  */
 
+export type UserRole = string | {
+  id: number;
+  name: string;
+  description?: string;
+};
+
 export interface User {
   id: number;
   username: string;
   email: string;
-  role: {
-    id: number;
-    name: string;
-    description: string;
-  };
+  role: UserRole;
+  permissions?: string[];
   is_active: boolean;
-  created_at: string;
+  created_at?: string;
 }
 
 export interface AuthTokenResponse {
   access_token: string;
   token_type: string;
-  user: User;
+  expires_in?: number;
+  username?: string;
+  role?: string;
+  permissions?: string[];
+  user?: User;
 }
 
 export interface ForensicCase {
@@ -108,21 +115,31 @@ export interface EvidenceItem {
 
 export interface RecoveryCandidate {
   candidate_id: string;
-  filename: string;
-  original_path: string;
-  timestamps: {
+  name?: string;
+  filename?: string;
+  original_path?: string;
+  path?: string;
+  record_identifier?: string;
+  declared_size_bytes?: number;
+  file_size_bytes?: number;
+  created_at?: string;
+  modified_at?: string;
+  deleted_at?: string;
+  timestamps?: {
     created?: string;
     modified?: string;
     accessed?: string;
   };
-  file_size_bytes: number;
   filesystem_type: string;
-  inode_record_id: string;
-  source_offset_bytes: number;
-  data_extents_count: number;
-  classification_status: 'RECOVERABLE' | 'PARTIALLY_RECOVERABLE' | 'METADATA_ONLY' | 'CORRUPTED' | 'UNSUPPORTED';
-  confidence_score: number;
-  bounds_check_valid: boolean;
+  inode_record_id?: string;
+  source_offset_bytes?: number;
+  data_extents_count?: number;
+  classification_status: 'RECOVERABLE' | 'PARTIALLY_RECOVERABLE' | 'METADATA_ONLY' | 'CORRUPTED' | 'UNSUPPORTED' | string;
+  confidence_score?: number;
+  bounds_check_valid?: boolean;
+  notes?: string;
+  is_recovered?: boolean;
+  download_url?: string;
 }
 
 export interface CarvedArtifact {

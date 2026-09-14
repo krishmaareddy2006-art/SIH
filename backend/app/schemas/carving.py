@@ -28,7 +28,8 @@ class CarvingCandidateItem(BaseModel):
 
 
 class CarvingScanRequest(BaseModel):
-    evidence_id: str = Field(..., example="EVD-20260913-001")
+    evidence_id: Optional[str] = Field(None, example="EVD-20260913-001")
+    device_path: Optional[str] = Field(None, example="E:\\")
     target_formats: Optional[List[str]] = Field(None, description="Optional target formats filter ['JPEG', 'PNG', 'PDF', 'ZIP']")
     custom_output_dir: Optional[str] = Field(None, description="Optional custom extraction output directory")
 
@@ -37,7 +38,8 @@ class CarvedArtifactResponse(BaseModel):
     id: int
     carved_id: str
     case_id: int
-    source_evidence_id: str
+    source_evidence_id: Optional[str] = None
+    source_device_path: Optional[str] = None
     file_format: str
     output_file_path: str
     carved_file_hash: str
@@ -58,10 +60,12 @@ class CarvedArtifactResponse(BaseModel):
 
 class CarvingScanResponse(BaseModel):
     scan_id: str
-    evidence_id: str
+    evidence_id: Optional[str] = None
+    device_path: Optional[str] = None
     case_id: int
     pre_scan_sha256: str
     post_scan_sha256: str
     is_evidence_untouched: bool
     metrics: CarvingMetrics
     carved_artifacts: List[CarvedArtifactResponse]
+

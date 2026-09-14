@@ -54,7 +54,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const hasRole = (allowedRoles: string[]) => {
     if (!user) return false;
-    return allowedRoles.includes(user.role?.name || '');
+    const roleName = typeof user.role === 'object' && user.role !== null ? user.role.name : (user.role || '');
+    return allowedRoles.includes(roleName);
   };
 
   return (

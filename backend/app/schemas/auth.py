@@ -16,6 +16,7 @@ class TokenResponse(BaseModel):
     username: str
     role: str
     permissions: List[str]
+    user: Optional["UserProfileResponse"] = None
 
 
 class UserProfileResponse(BaseModel):

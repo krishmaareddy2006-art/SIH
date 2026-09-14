@@ -35,4 +35,5 @@ Thumbs.db
 # Generated Evidence & Reports
 reports/
 **/carved_output/
+**/recovered_output/
 

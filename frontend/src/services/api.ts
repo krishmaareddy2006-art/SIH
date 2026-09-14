@@ -227,16 +227,31 @@ export const api = {
     }),
 
   // 8. Recovery Workspace & Carving
-  scanFilesystemRecovery: (caseId: number, evidenceId: string) =>
+  scanFilesystemRecovery: (caseId: number, target: { evidence_id?: string; device_path?: string }) =>
     request<{ candidates: RecoveryCandidate[]; total_candidates_found: number }>(`/cases/${caseId}/recovery/scan`, {
       method: 'POST',
-      body: JSON.stringify({ evidence_id: evidenceId }),
+      body: JSON.stringify(target),
     }),
 
-  carveFiles: (caseId: number, evidenceId: string, formats: string[]) =>
+  extractRecoveryCandidates: (
+    caseId: number,
+    payload: { evidence_id?: string; device_path?: string; candidate_ids: string[]; custom_output_dir?: string }
+  ) =>
+    request<{
+      job_id: string;
+      total_requested: number;
+      successfully_extracted: number;
+      failed_extractions: number;
+      extracted_artifacts: any[];
+    }>(`/cases/${caseId}/recovery/extract`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  carveFiles: (caseId: number, target: { evidence_id?: string; device_path?: string }, formats: string[]) =>
     request<{ carved_artifacts: CarvedArtifact[]; metrics: any }>(`/cases/${caseId}/carving/scan`, {
       method: 'POST',
-      body: JSON.stringify({ evidence_id: evidenceId, target_formats: formats }),
+      body: JSON.stringify({ ...target, target_formats: formats }),
     }),
 
   // 9. Job Details & Execution Monitor

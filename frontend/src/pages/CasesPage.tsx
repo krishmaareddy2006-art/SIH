@@ -68,7 +68,9 @@ export const CasesPage: React.FC = () => {
       <div className="bg-[#111827] border border-[#253044] rounded-2xl overflow-hidden shadow-card">
         <div className="p-4 border-b border-[#253044] flex items-center justify-between text-xs text-[#94A3B8] font-mono">
           <span>Active Cases Inventory ({cases.length})</span>
-          <span className="text-[#64748B]">Role Scope: {user?.role?.name || 'Operator'}</span>
+          <span className="text-[#64748B]">
+            Role Scope: {typeof user?.role === 'object' && user.role !== null ? user.role.name : (user?.role || 'Operator')}
+          </span>
         </div>
 
         <div className="divide-y divide-[#253044]">

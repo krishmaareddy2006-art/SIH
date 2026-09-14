@@ -58,8 +58,9 @@ async def scan_file_carving(
         operator_username=current_user.username,
     )
 
+    target_name = scan_req.device_path or scan_req.evidence_id
     audit_log(
-        message=f"File carving scan executed on evidence '{scan_req.evidence_id}' for Case #{case.case_number} by '{current_user.username}'.",
+        message=f"File carving scan executed on '{target_name}' for Case #{case.case_number} by '{current_user.username}'.",
         operation="CARVING_SCAN_API",
         status="SUCCESS",
         request_id=request_id,

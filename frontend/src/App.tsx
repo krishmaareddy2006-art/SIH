@@ -18,13 +18,25 @@ import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 
 const AppContent: React.FC = () => {
+  const { isAuthenticated, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedDeviceForSanitization, setSelectedDeviceForSanitization] = useState('');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
+  React.useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      setIsLoginModalOpen(true);
+    }
+  }, [isLoading, isAuthenticated]);
+
   const handleNavigateToSanitization = (devicePath: string) => {
     setSelectedDeviceForSanitization(devicePath);
     setActiveTab('sanitization');
+  };
+
+  const handleLoginSuccess = () => {
+    setIsLoginModalOpen(false);
+    setActiveTab('dashboard');
   };
 
   const renderActivePage = () => {
@@ -75,7 +87,7 @@ const AppContent: React.FC = () => {
             >
               ✕
             </button>
-            <LoginPage onSuccess={() => setIsLoginModalOpen(false)} />
+            <LoginPage onSuccess={handleLoginSuccess} />
           </div>
         </div>
       )}

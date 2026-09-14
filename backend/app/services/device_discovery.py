@@ -354,7 +354,11 @@ class DeviceDiscoveryService:
 
         for dev_item in raw_blockdevices:
             dev_type = dev_item.get("type", "")
-            if dev_type not in ["disk", "loop"]:
+            dev_name = dev_item.get("name", "")
+            # Exclude virtual loop devices, cdroms, ramdisks, and container squashfs mounts
+            if dev_type in ["loop", "rom", "ram"] or dev_name.startswith("loop"):
+                continue
+            if dev_type not in ["disk"]:
                 continue
 
             raw_path = dev_item.get("path") or f"/dev/{dev_item.get('name')}"

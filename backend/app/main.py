@@ -122,6 +122,19 @@ app.add_exception_handler(Exception, global_unhandled_exception_handler)
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)
 
 
+@app.get("/", tags=["Root"])
+async def root():
+    """Root endpoint welcoming visitors and linking to OpenAPI documentation."""
+    return {
+        "project": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "status": "ONLINE",
+        "documentation": f"{settings.API_V1_STR}/docs",
+        "health_check": f"{settings.API_V1_STR}/health",
+    }
+
+
+
 if __name__ == "__main__":
     import uvicorn
 

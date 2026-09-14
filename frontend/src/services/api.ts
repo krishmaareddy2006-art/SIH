@@ -254,6 +254,9 @@ export const api = {
       body: JSON.stringify({ ...target, target_formats: formats }),
     }),
 
+  listRecoveredArtifacts: (caseId: number) =>
+    request<any[]>(`/cases/${caseId}/recovery/results`),
+
   // 9. Job Details & Execution Monitor
   listJobs: (caseId?: number) => request<JobRecord[]>(`/jobs/${caseId ? `?case_id=${caseId}` : ''}`),
   getJobStatus: (jobId: string) => request<JobRecord>(`/jobs/${jobId}`),

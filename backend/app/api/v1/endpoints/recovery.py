@@ -129,7 +129,7 @@ async def list_recovered_artifacts(
     results = []
     for a in artifacts:
         resp = ExtractedArtifactResponse.model_validate(a)
-        resp.download_url = f"/api/v1/recovery/{a.artifact_id}/download"
+        resp.download_url = f"http://127.0.0.1:8000/api/v1/recovery/{a.artifact_id}/download"
         results.append(resp)
     return results
 
@@ -140,11 +140,29 @@ async def download_recovered_artifact(
     artifact_id: str,
     db: Session = Depends(get_db),
 ) -> FileResponse:
-    """Downloads the physical extracted recovered file."""
+    """Downloads the physical extracted recovered file with exact original filename and MIME type."""
+    import mimetypes
+    from urllib.parse import quote
+
     artifact = db.query(RecoveredArtifact).filter(RecoveredArtifact.artifact_id == artifact_id).first()
     if not artifact or not artifact.output_file_path or not os.path.exists(artifact.output_file_path):
         raise ForensicShieldException("Recovered file not found on disk", code="FILE_NOT_FOUND", status_code=404)
 
-    filename = os.path.basename(artifact.original_path) if artifact.original_path else os.path.basename(artifact.output_file_path)
-    return FileResponse(path=artifact.output_file_path, filename=filename)
+    raw_filename = os.path.basename(artifact.original_path) if artifact.original_path else os.path.basename(artifact.output_file_path)
+    clean_filename = raw_filename.replace('"', '').strip()
+    media_type = mimetypes.guess_type(clean_filename)[0] or "application/octet-stream"
+
+    encoded_filename = quote(clean_filename)
+    headers = {
+        "Content-Disposition": f'attachment; filename="{clean_filename}"; filename*=UTF-8\'\'{encoded_filename}',
+        "Access-Control-Expose-Headers": "Content-Disposition",
+    }
+
+    return FileResponse(
+        path=artifact.output_file_path,
+        filename=clean_filename,
+        media_type=media_type,
+        headers=headers,
+    )
+
 

@@ -456,7 +456,7 @@ class FilesystemRecoveryService:
                     db.refresh(db_artifact)
 
                     resp_item = ExtractedArtifactResponse.model_validate(db_artifact)
-                    resp_item.download_url = f"/api/v1/recovery/{db_artifact.artifact_id}/download"
+                    resp_item.download_url = f"http://127.0.0.1:8000/api/v1/recovery/{db_artifact.artifact_id}/download"
                     extracted_artifacts.append(resp_item)
                     success_count += 1
                 except Exception as e:
@@ -533,7 +533,7 @@ class FilesystemRecoveryService:
                     db.refresh(db_artifact)
 
                     resp_item = ExtractedArtifactResponse.model_validate(db_artifact)
-                    resp_item.download_url = f"/api/v1/recovery/{db_artifact.artifact_id}/download"
+                    resp_item.download_url = f"http://127.0.0.1:8000/api/v1/recovery/{db_artifact.artifact_id}/download"
                     extracted_artifacts.append(resp_item)
                 else:
                     fail_count += 1

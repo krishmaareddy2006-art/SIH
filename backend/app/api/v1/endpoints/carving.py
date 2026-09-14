@@ -89,12 +89,30 @@ async def download_carved_artifact(
     carved_id: str,
     db: Session = Depends(get_db),
 ) -> FileResponse:
-    """Downloads the physical extracted carved file."""
+    """Downloads the physical extracted carved file with exact filename and MIME type."""
+    import mimetypes
+    from urllib.parse import quote
+
     artifact = db.query(CarvedFileArtifact).filter(CarvedFileArtifact.carved_id == carved_id).first()
     if not artifact or not artifact.output_file_path or not os.path.exists(artifact.output_file_path):
         raise ForensicShieldException("Carved file not found on disk", code="FILE_NOT_FOUND", status_code=404)
 
-    filename = os.path.basename(artifact.output_file_path)
-    return FileResponse(path=artifact.output_file_path, filename=filename)
+    raw_filename = os.path.basename(artifact.output_file_path)
+    clean_filename = raw_filename.replace('"', '').strip()
+    media_type = mimetypes.guess_type(clean_filename)[0] or "application/octet-stream"
+
+    encoded_filename = quote(clean_filename)
+    headers = {
+        "Content-Disposition": f'attachment; filename="{clean_filename}"; filename*=UTF-8\'\'{encoded_filename}',
+        "Access-Control-Expose-Headers": "Content-Disposition",
+    }
+
+    return FileResponse(
+        path=artifact.output_file_path,
+        filename=clean_filename,
+        media_type=media_type,
+        headers=headers,
+    )
+
 
 

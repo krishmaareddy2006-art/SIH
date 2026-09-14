@@ -68,19 +68,54 @@ export const RecoveryWorkspacePage: React.FC = () => {
 
   const activeTargetLabel = targetType === 'device' ? selectedDevicePath : selectedEvidenceId;
 
+  const markRecoveredCandidates = (cands: RecoveryCandidate[], recoveredArts: any[]) => {
+    const recoveredMap = new Map(recoveredArts.map(a => [a.candidate_id, a]));
+    return cands.map(c => {
+      if (recoveredMap.has(c.candidate_id)) {
+        const art = recoveredMap.get(c.candidate_id);
+        return {
+          ...c,
+          is_recovered: true,
+          download_url: `http://127.0.0.1:8000/api/v1/recovery/${art.artifact_id}/download`,
+        };
+      }
+      return c;
+    });
+  };
+
+  const handleDownload = (downloadUrl: string, filename: string) => {
+    const fullUrl = downloadUrl.startsWith('http')
+      ? downloadUrl
+      : `http://127.0.0.1:8000${downloadUrl}`;
+
+    const link = document.createElement('a');
+    link.href = fullUrl;
+    link.setAttribute('download', filename);
+    link.target = '_blank';
+    link.rel = 'noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleScanRecovery = async () => {
     if (!activeCase || !activeTargetLabel) return;
     setIsScanning(true);
     try {
-      const res = await api.scanFilesystemRecovery(activeCase.id, activeTargetPayload);
-      if (res.data) {
-        const cands = res.data.candidates || [];
-        setCandidates(cands);
+      const [scanRes, recRes] = await Promise.all([
+        api.scanFilesystemRecovery(activeCase.id, activeTargetPayload),
+        api.listRecoveredArtifacts(activeCase.id),
+      ]);
+      if (scanRes.data) {
+        const rawCands = scanRes.data.candidates || [];
+        const existingRecovered = recRes.data || [];
+        const synced = markRecoveredCandidates(rawCands, existingRecovered);
+        setCandidates(synced);
         setSelectedCandidateIds([]);
-        const count = res.data.total_candidates_found ?? cands.length;
+        const count = scanRes.data.total_candidates_found ?? rawCands.length;
         addToast('success', 'Filesystem Scan Complete', `Identified ${count} deleted file candidates on ${activeTargetLabel}.`);
-      } else if (res.error) {
-        addToast('error', 'Recovery Scan Blocked', res.error.error.message);
+      } else if (scanRes.error) {
+        addToast('error', 'Recovery Scan Blocked', scanRes.error.error.message);
       }
     } catch (err: any) {
       addToast('error', 'Scan Failed', err?.message || 'Failed to scan target');
@@ -121,7 +156,7 @@ export const RecoveryWorkspacePage: React.FC = () => {
         const extracted = res.data.extracted_artifacts || [];
         const extractedMap = new Map(extracted.map(a => [a.candidate_id, a]));
 
-        // Update candidates state with download URLs
+        // Update candidates state with exact download URLs
         setCandidates(prev =>
           prev.map(c => {
             if (extractedMap.has(c.candidate_id)) {
@@ -129,7 +164,7 @@ export const RecoveryWorkspacePage: React.FC = () => {
               return {
                 ...c,
                 is_recovered: true,
-                download_url: art.download_url || `http://127.0.0.1:8000/api/v1/recovery/${art.artifact_id}/download`,
+                download_url: `http://127.0.0.1:8000/api/v1/recovery/${art.artifact_id}/download`,
               };
             }
             return c;
@@ -375,7 +410,7 @@ export const RecoveryWorkspacePage: React.FC = () => {
                 const isSelected = selectedCandidateIds.includes(c.candidate_id);
                 const isRecoverable = c.classification_status === 'RECOVERABLE';
                 const effectiveSize = c.file_size_bytes || c.declared_size_bytes || 0;
-                const effectiveName = c.name || c.filename || (c.path ? c.path.split(/[\\/]/).pop() : c.candidate_id);
+                const effectiveName: string = c.name || c.filename || (c.path ? c.path.split(/[\\/]/).pop() : c.candidate_id) || 'recovered_file';
 
                 return (
                   <tr
@@ -404,16 +439,15 @@ export const RecoveryWorkspacePage: React.FC = () => {
                     <td className="p-3 font-bold text-[#FBBF24]">{c.confidence_score || 95}/100</td>
                     <td className="p-3 text-right">
                       {c.is_recovered && c.download_url ? (
-                        <a
-                          href={c.download_url}
-                          download
-                          target="_blank"
-                          rel="noreferrer"
+                        <button
+                          type="button"
+                          onClick={() => handleDownload(c.download_url!, effectiveName)}
                           className="inline-flex items-center space-x-1.5 bg-[#10B981]/20 hover:bg-[#10B981]/30 text-[#10B981] border border-[#10B981]/40 px-3 py-1 rounded-lg transition-all font-sans font-semibold text-xs cursor-pointer shadow-subtle"
+                          title={`Download exact file: ${effectiveName}`}
                         >
                           <Download className="w-3.5 h-3.5" />
                           <span>Download</span>
-                        </a>
+                        </button>
                       ) : (
                         <button
                           onClick={() => handleExtractCandidates([c.candidate_id])}
@@ -479,16 +513,19 @@ export const RecoveryWorkspacePage: React.FC = () => {
                     <td className="p-3 text-[#FBBF24] text-[11px]">{ca.carved_file_hash.substring(0, 16)}...</td>
                     <td className="p-3"><StatusBadge status={ca.confidence_level} /></td>
                     <td className="p-3 text-right">
-                      <a
-                        href={`http://127.0.0.1:8000/api/v1/carving/${ca.carved_id}/download`}
-                        download
-                        target="_blank"
-                        rel="noreferrer"
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDownload(
+                            `http://127.0.0.1:8000/api/v1/carving/${ca.carved_id}/download`,
+                            `${ca.carved_id}.${ca.file_format.toLowerCase()}`
+                          )
+                        }
                         className="inline-flex items-center space-x-1.5 bg-[#22D3EE]/10 hover:bg-[#22D3EE]/20 text-[#22D3EE] border border-[#22D3EE]/30 px-2.5 py-1 rounded-lg transition-all font-sans font-semibold text-xs cursor-pointer shadow-subtle"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>Download</span>
-                      </a>
+                      </button>
                     </td>
                   </tr>
                 ))}

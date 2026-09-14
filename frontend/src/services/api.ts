@@ -26,7 +26,16 @@ export type TokenResponse = AuthTokenResponse;
 export type JobResponse = JobRecord;
 
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1';
+const getApiBaseUrl = (): string => {
+  let envUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1').trim().replace(/\/+$/, '');
+  if (!envUrl.endsWith('/api/v1')) {
+    envUrl += '/api/v1';
+  }
+  return envUrl;
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
 
 export interface SafeErrorResponse {
   error: {

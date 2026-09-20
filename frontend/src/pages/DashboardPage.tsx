@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Briefcase, Activity, History, Flame, FileSearch, UploadCloud, CheckCircle2, ArrowUpRight, Radio, ChevronRight } from 'lucide-react';
+import { Shield, Briefcase, Activity, History, Flame, FileSearch, UploadCloud, CheckCircle2, ArrowUpRight, Radio, ChevronRight, ShieldAlert, LogIn } from 'lucide-react';
 import { api } from '../services/api';
 import { SystemStatus, ForensicCase, JobRecord, AuditEvent } from '../types';
 import { LoadingSpinner, ErrorState } from '../components/common/StateViews';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { useAuth } from '../context/AuthContext';
 
 export const DashboardPage: React.FC<{ onNavigate: (tabId: string) => void }> = ({ onNavigate }) => {
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [health, setHealth] = useState<SystemStatus | null>(null);
   const [cases, setCases] = useState<ForensicCase[]>([]);
   const [recentJobs, setRecentJobs] = useState<JobRecord[]>([]);
@@ -16,27 +18,42 @@ export const DashboardPage: React.FC<{ onNavigate: (tabId: string) => void }> = 
   const loadDashboardData = async () => {
     setIsLoading(true);
     setError('');
-    const [hRes, cRes, jRes, aRes] = await Promise.all([
-      api.getSystemHealth(),
-      api.listCases(),
-      api.listJobs(),
-      api.listAuditEvents({ limit: 5 }),
-    ]);
 
-    if (hRes.data) setHealth(hRes.data);
-    if (cRes.data) setCases(cRes.data);
-    if (jRes.data) setRecentJobs(jRes.data);
-    if (aRes.data) setRecentAudit(aRes.data);
+    try {
+      const hRes = await api.getSystemHealth();
+      if (hRes.data) setHealth(hRes.data);
 
-    if (hRes.error && !hRes.data) {
-      setError(hRes.error.error.message);
+      if (isAuthenticated) {
+        const [cRes, jRes, aRes] = await Promise.all([
+          api.listCases(),
+          api.listJobs(),
+          api.listAuditEvents({ limit: 5 }),
+        ]);
+
+        if (cRes.data) setCases(cRes.data);
+        if (jRes.data) setRecentJobs(jRes.data);
+        if (aRes.data) setRecentAudit(aRes.data);
+      } else {
+        setCases([]);
+        setRecentJobs([]);
+        setRecentAudit([]);
+      }
+
+      if (hRes.error && !hRes.data) {
+        setError(hRes.error.error.message);
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to load system telemetry.');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    if (!isAuthLoading) {
+      loadDashboardData();
+    }
+  }, [isAuthenticated, isAuthLoading]);
 
   if (isLoading) return <LoadingSpinner message="Fetching ForensicShield system state & telemetry..." />;
   if (error) return <ErrorState code="DASHBOARD_LOAD_ERROR" message={error} onRetry={loadDashboardData} />;
@@ -92,8 +109,17 @@ export const DashboardPage: React.FC<{ onNavigate: (tabId: string) => void }> = 
 
         <div className="relative z-10 flex flex-wrap items-center gap-2 text-xs font-mono">
           <div className="bg-[#070B14] border border-[#1B2B40] px-3 py-1.5 rounded-lg flex items-center space-x-2 shadow-subtle">
-            <CheckCircle2 className="w-3.5 h-3.5 text-[#20C997]" />
-            <span className="text-[#94A3B8]">Safe Mode: <strong className="text-[#20C997]">ACTIVE</strong></span>
+            {health?.safe_mode !== false ? (
+              <>
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#20C997]" />
+                <span className="text-[#94A3B8]">Safe Mode: <strong className="text-[#20C997]">ACTIVE</strong></span>
+              </>
+            ) : (
+              <>
+                <ShieldAlert className="w-3.5 h-3.5 text-[#FB7185]" />
+                <span className="text-[#94A3B8]">Safe Mode: <strong className="text-[#FB7185]">HARDWARE DIRECT</strong></span>
+              </>
+            )}
           </div>
           <div className="bg-[#070B14] border border-[#1B2B40] px-3 py-1.5 rounded-lg flex items-center space-x-2 shadow-subtle">
             <Shield className="w-3.5 h-3.5 text-[#1683FF]" />
@@ -159,15 +185,17 @@ export const DashboardPage: React.FC<{ onNavigate: (tabId: string) => void }> = 
         <div className="bg-[#0E1726] hover:bg-[#121E30] p-5 rounded-xl border border-[#1B2B40] hover:border-[#20C997]/30 space-y-2.5 shadow-card transition-all duration-150">
           <div className="flex items-center justify-between text-[#94A3B8]">
             <span className="text-[10px] font-bold uppercase tracking-wider font-mono">SYSTEM SAFETY</span>
-            <div className="p-1.5 rounded-lg bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20">
-              <CheckCircle2 className="w-4 h-4" />
+            <div className={`p-1.5 rounded-lg border ${health?.safe_mode !== false ? 'bg-[#20C997]/10 text-[#20C997] border-[#20C997]/20' : 'bg-[#FB7185]/10 text-[#FB7185] border-[#FB7185]/20'}`}>
+              {health?.safe_mode !== false ? <CheckCircle2 className="w-4 h-4" /> : <ShieldAlert className="w-4 h-4" />}
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-3xl sm:text-4xl font-extrabold text-[#20C997] font-mono tracking-tight">PASS</span>
+            <span className={`text-3xl sm:text-4xl font-extrabold font-mono tracking-tight ${health?.safe_mode !== false ? 'text-[#20C997]' : 'text-[#FB7185]'}`}>
+              {health?.safe_mode !== false ? 'PASS' : 'LIVE'}
+            </span>
             <span className="text-[11px] text-[#8B6CFF] font-mono font-medium flex items-center space-x-1">
               <span>●</span>
-              <span>Simulated Only</span>
+              <span>{health?.safe_mode !== false ? 'Simulated Only' : 'Real Hardware'}</span>
             </span>
           </div>
         </div>

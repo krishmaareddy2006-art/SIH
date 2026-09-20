@@ -20,6 +20,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    const handleUnauthorized = () => {
+      setStoredToken(null);
+      setToken(null);
+      setUser(null);
+      setIsLoading(false);
+    };
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => {
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+    };
+  }, []);
+
+  useEffect(() => {
     async function loadProfile() {
       if (!token) {
         setIsLoading(false);

@@ -84,6 +84,12 @@ async function request<T>(
     const body = await response.json().catch(() => ({}));
 
     if (!response.ok) {
+      if (response.status === 401 && !path.includes('/auth/login')) {
+        setStoredToken(null);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+        }
+      }
       const errObj: SafeErrorResponse = body?.error
         ? (body as SafeErrorResponse)
         : {

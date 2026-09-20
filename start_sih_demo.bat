@@ -12,6 +12,6 @@ SET SAFE_MODE=true
 SET REAL_DEVICE_OPERATIONS=false
 SET ENABLE_BLOCKCHAIN_NOTARIZATION=false
 
-py run_sih_demo.py
+python run_sih_demo.py
 
 PAUSE

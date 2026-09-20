@@ -59,29 +59,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onClos
   };
 
   return (
-    <aside className="w-60 bg-[#080B14] border-r border-[#253044] flex flex-col justify-between shrink-0 h-screen sticky top-0 select-none z-40">
+    <aside className="w-60 bg-[#080D17] border-r border-[#1B2B40] flex flex-col justify-between shrink-0 h-screen sticky top-0 select-none z-40">
       {/* Brand Header */}
       <div>
-        <div className="h-14 px-4 border-b border-[#253044] flex items-center justify-between">
+        <div className="h-14 px-4 border-b border-[#1B2B40] flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
-            <div className="p-1.5 bg-[#22D3EE]/10 border border-[#22D3EE]/30 rounded-lg text-[#22D3EE]">
-              <Shield className="w-4 h-4" />
+            <div className="p-1.5 bg-[#1683FF]/10 border border-[#1683FF]/25 rounded-lg text-[#1683FF]">
+              <Shield className="w-4 h-4 text-[#1683FF]" />
             </div>
             <div>
               <div className="flex items-center space-x-1.5">
-                <span className="font-extrabold text-xs tracking-wider text-[#F8FAFC] uppercase font-sans">
-                  FORENSIC<span className="text-[#22D3EE]">SHIELD</span>
+                <span className="font-extrabold text-xs tracking-wider text-[#F1F5F9] uppercase font-sans">
+                  FORENSIC<span className="text-[#16C7D9]">SHIELD</span>
                 </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#22D3EE] animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#16C7D9] animate-pulse" />
               </div>
-              <p className="text-[10px] font-mono text-[#64748B]">Enterprise DFIR</p>
+              <p className="text-[10px] font-mono text-[#94A3B8]">Enterprise DFIR Platform</p>
             </div>
           </div>
 
           {onCloseMobile && (
             <button
               onClick={onCloseMobile}
-              className="md:hidden text-[#94A3B8] hover:text-[#F8FAFC] p-1 rounded-lg"
+              className="md:hidden text-[#94A3B8] hover:text-[#F1F5F9] p-1 rounded-lg hover:bg-[#121E30]"
             >
               <X className="w-4 h-4" />
             </button>
@@ -106,22 +106,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onClos
                         onClick={() => handleSelect(item.id)}
                         className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer group ${
                           isActive
-                            ? 'bg-[#22D3EE]/10 text-[#22D3EE] border border-[#22D3EE]/25 font-semibold shadow-subtle'
-                            : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111827] border border-transparent font-medium'
+                            ? 'bg-[#1683FF]/10 text-[#F1F5F9] border border-[#1683FF]/30 font-medium'
+                            : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#0E1726] border border-transparent font-medium'
                         }`}
                         aria-current={isActive ? 'page' : undefined}
                       >
                         <div className="flex items-center space-x-2.5">
                           <span
                             className={`transition-colors ${
-                              isActive ? 'text-[#22D3EE]' : 'text-[#64748B] group-hover:text-[#94A3B8]'
+                              isActive ? 'text-[#1683FF]' : 'text-[#64748B] group-hover:text-[#94A3B8]'
                             }`}
                           >
                             {item.icon}
                           </span>
                           <span>{item.label}</span>
                         </div>
-                        {isActive && <ChevronRight className="w-3 h-3 text-[#22D3EE]" />}
+                        {isActive && <ChevronRight className="w-3 h-3 text-[#1683FF]" />}
                       </button>
                     );
                   })}
@@ -132,12 +132,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onClos
       </div>
 
       {/* Footer System Status Badge */}
-      <div className="p-3 border-t border-[#253044] bg-[#0B0F19] text-[11px] text-[#94A3B8] flex items-center justify-between font-mono">
+      <div className="p-3 border-t border-[#1B2B40] bg-[#070B14] text-[11px] text-[#94A3B8] flex items-center justify-between font-mono">
         <span className="flex items-center space-x-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
-          <span className="text-[#34D399] text-[10px]">SAFE_MODE: ON</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#20C997] animate-pulse" />
+          <span className="text-[#20C997] text-[10px] font-semibold">SAFE_MODE: ON</span>
         </span>
-        <span className="text-[#64748B] text-[10px]">ISO 27037</span>
+        <span className="px-2 py-0.5 rounded bg-[#0E1726] border border-[#1B2B40] text-[#94A3B8] text-[10px]">
+          ISO 27037
+        </span>
       </div>
     </aside>
   );

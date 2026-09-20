@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Briefcase, Activity, History, Flame, FileSearch, UploadCloud, CheckCircle2, ArrowUpRight } from 'lucide-react';
+import { Shield, Briefcase, Activity, History, Flame, FileSearch, UploadCloud, CheckCircle2, ArrowUpRight, Radio, ChevronRight } from 'lucide-react';
 import { api } from '../services/api';
 import { SystemStatus, ForensicCase, JobRecord, AuditEvent } from '../types';
 import { LoadingSpinner, ErrorState } from '../components/common/StateViews';
@@ -41,98 +41,157 @@ export const DashboardPage: React.FC<{ onNavigate: (tabId: string) => void }> = 
   if (isLoading) return <LoadingSpinner message="Fetching ForensicShield system state & telemetry..." />;
   if (error) return <ErrorState code="DASHBOARD_LOAD_ERROR" message={error} onRetry={loadDashboardData} />;
 
+  const runningJobsCount = recentJobs.filter(j => j.status === 'RUNNING').length;
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Top Incident Command Banner */}
-      <div className="bg-[#111827] p-5 sm:p-6 rounded-2xl border border-[#253044] shadow-card flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center space-x-2.5">
-            <h2 className="text-lg sm:text-xl font-bold text-[#F8FAFC]">Forensic Incident Command Center</h2>
-            <span className="bg-[#22D3EE]/10 text-[#22D3EE] border border-[#22D3EE]/30 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">
-              LIVE
-            </span>
-          </div>
-          <p className="text-xs text-[#94A3B8] mt-1">
-            Enterprise Digital Forensics & Data Integrity Control Center
-          </p>
+    <div className="space-y-5 animate-fade-in">
+      {/* Top Incident Command Hero */}
+      <div className="bg-[#0E1726] p-5 sm:p-6 rounded-xl border border-[#1B2B40] shadow-card relative overflow-hidden flex flex-wrap items-center justify-between gap-4">
+        {/* Subtle dark, low-contrast forensic data watermark */}
+        <div className="absolute right-0 top-0 bottom-0 w-72 pointer-events-none opacity-10 hidden md:block overflow-hidden">
+          <svg viewBox="0 0 300 130" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full object-cover">
+            <circle cx="230" cy="65" r="50" stroke="#1683FF" strokeWidth="1" strokeDasharray="3 3" />
+            <circle cx="230" cy="65" r="30" stroke="#16C7D9" strokeWidth="1" />
+            <path d="M 230 15 L 230 115 M 180 65 L 280 65" stroke="#1B2B40" strokeWidth="1" />
+            <rect x="60" y="25" width="70" height="70" rx="8" stroke="#1B2B40" strokeWidth="1" />
+            <rect x="80" y="45" width="30" height="30" rx="4" stroke="#1683FF" strokeWidth="1" />
+            <path d="M 130 65 L 180 65" stroke="#16C7D9" strokeWidth="1" strokeDasharray="3 2" />
+          </svg>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 text-xs font-mono">
-          <div className="bg-[#0B0F19] border border-[#253044] px-3 py-1.5 rounded-xl flex items-center space-x-2">
-            <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399]" />
-            <span className="text-[#94A3B8]">Safe Mode: <strong className="text-[#34D399]">ACTIVE</strong></span>
+        <div className="relative z-10 space-y-1.5">
+          <div className="flex items-center space-x-2.5">
+            <span className="text-[10px] font-mono font-bold tracking-wider text-[#16C7D9] uppercase bg-[#16C7D9]/10 px-2 py-0.5 rounded border border-[#16C7D9]/20">
+              DFIR COMMAND CENTER
+            </span>
+            <span className="bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/25 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full inline-flex items-center space-x-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#20C997] animate-pulse" />
+              <span>LIVE</span>
+            </span>
           </div>
-          <div className="bg-[#0B0F19] border border-[#253044] px-3 py-1.5 rounded-xl flex items-center space-x-2">
-            <Shield className="w-3.5 h-3.5 text-[#22D3EE]" />
-            <span className="text-[#94A3B8]">Audit Chain: <strong className="text-[#22D3EE]">INTACT</strong></span>
+
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#F1F5F9] tracking-tight font-sans">
+            Forensic Incident Command Center
+          </h1>
+          <p className="text-xs text-[#94A3B8]">
+            Enterprise Digital Forensics & Data Integrity Control Center
+          </p>
+
+          {/* Compact Workflow Indicator: Collect → Analyze → Preserve → Report */}
+          <div className="flex items-center space-x-2 text-[10px] font-mono text-[#64748B] pt-1">
+            <span className="text-[#94A3B8] font-medium uppercase tracking-wider">Workflow:</span>
+            <span className="text-[#F1F5F9] bg-[#070B14] px-1.5 py-0.5 rounded border border-[#1B2B40]">Collect</span>
+            <span className="text-[#64748B]">→</span>
+            <span className="text-[#F1F5F9] bg-[#070B14] px-1.5 py-0.5 rounded border border-[#1B2B40]">Analyze</span>
+            <span className="text-[#64748B]">→</span>
+            <span className="text-[#F1F5F9] bg-[#070B14] px-1.5 py-0.5 rounded border border-[#1B2B40]">Preserve</span>
+            <span className="text-[#64748B]">→</span>
+            <span className="text-[#F1F5F9] bg-[#070B14] px-1.5 py-0.5 rounded border border-[#1B2B40]">Report</span>
+          </div>
+        </div>
+
+        <div className="relative z-10 flex flex-wrap items-center gap-2 text-xs font-mono">
+          <div className="bg-[#070B14] border border-[#1B2B40] px-3 py-1.5 rounded-lg flex items-center space-x-2 shadow-subtle">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#20C997]" />
+            <span className="text-[#94A3B8]">Safe Mode: <strong className="text-[#20C997]">ACTIVE</strong></span>
+          </div>
+          <div className="bg-[#070B14] border border-[#1B2B40] px-3 py-1.5 rounded-lg flex items-center space-x-2 shadow-subtle">
+            <Shield className="w-3.5 h-3.5 text-[#1683FF]" />
+            <span className="text-[#94A3B8]">Audit Chain: <strong className="text-[#1683FF]">INTACT</strong></span>
           </div>
         </div>
       </div>
 
-      {/* Metrics Cards */}
+      {/* 4 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#111827] p-5 rounded-2xl border border-[#253044] space-y-3 shadow-subtle hover:border-[#22D3EE]/40 transition-colors">
+        {/* Active Cases */}
+        <div className="bg-[#0E1726] hover:bg-[#121E30] p-5 rounded-xl border border-[#1B2B40] hover:border-[#1683FF]/30 space-y-2.5 shadow-card transition-all duration-150">
           <div className="flex items-center justify-between text-[#94A3B8]">
-            <span className="text-[11px] font-semibold uppercase tracking-wider font-mono">Active Cases</span>
-            <Briefcase className="w-4 h-4 text-[#22D3EE]" />
+            <span className="text-[10px] font-bold uppercase tracking-wider font-mono">ACTIVE CASES</span>
+            <div className="p-1.5 rounded-lg bg-[#1683FF]/10 text-[#1683FF] border border-[#1683FF]/20">
+              <Briefcase className="w-4 h-4" />
+            </div>
           </div>
-          <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-[#F8FAFC] font-mono">{cases.length}</span>
-            <span className="text-[11px] text-[#34D399] font-mono">Total Cases</span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-3xl sm:text-4xl font-extrabold text-[#F1F5F9] font-mono tracking-tight">{cases.length}</span>
+            <span className="text-[11px] text-[#1683FF] font-mono font-medium flex items-center space-x-1">
+              <span>●</span>
+              <span>Total Cases</span>
+            </span>
           </div>
         </div>
 
-        <div className="bg-[#111827] p-5 rounded-2xl border border-[#253044] space-y-3 shadow-subtle hover:border-[#FBBF24]/40 transition-colors">
+        {/* Background Jobs */}
+        <div className="bg-[#0E1726] hover:bg-[#121E30] p-5 rounded-xl border border-[#1B2B40] hover:border-[#16C7D9]/30 space-y-2.5 shadow-card transition-all duration-150">
           <div className="flex items-center justify-between text-[#94A3B8]">
-            <span className="text-[11px] font-semibold uppercase tracking-wider font-mono">Background Jobs</span>
-            <Activity className="w-4 h-4 text-[#FBBF24]" />
+            <span className="text-[10px] font-bold uppercase tracking-wider font-mono">BACKGROUND JOBS</span>
+            <div className="p-1.5 rounded-lg bg-[#16C7D9]/10 text-[#16C7D9] border border-[#16C7D9]/20">
+              <Activity className="w-4 h-4" />
+            </div>
           </div>
-          <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-[#F8FAFC] font-mono">{recentJobs.length}</span>
-            <span className="text-[11px] text-[#FBBF24] font-mono">Queued / Running</span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-3xl sm:text-4xl font-extrabold text-[#F1F5F9] font-mono tracking-tight">{recentJobs.length}</span>
+            <span className="text-[11px] text-[#16C7D9] font-mono font-medium flex items-center space-x-1">
+              <span>●</span>
+              <span>{runningJobsCount > 0 ? `${runningJobsCount} Running` : 'Queued / Running'}</span>
+            </span>
           </div>
         </div>
 
-        <div className="bg-[#111827] p-5 rounded-2xl border border-[#253044] space-y-3 shadow-subtle hover:border-[#34D399]/40 transition-colors">
+        {/* Audit Ledger */}
+        <div className="bg-[#0E1726] hover:bg-[#121E30] p-5 rounded-xl border border-[#1B2B40] hover:border-[#F2B84B]/30 space-y-2.5 shadow-card transition-all duration-150">
           <div className="flex items-center justify-between text-[#94A3B8]">
-            <span className="text-[11px] font-semibold uppercase tracking-wider font-mono">Audit Ledger</span>
-            <History className="w-4 h-4 text-[#34D399]" />
+            <span className="text-[10px] font-bold uppercase tracking-wider font-mono">AUDIT LEDGER</span>
+            <div className="p-1.5 rounded-lg bg-[#F2B84B]/10 text-[#F2B84B] border border-[#F2B84B]/20">
+              <History className="w-4 h-4" />
+            </div>
           </div>
-          <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-[#F8FAFC] font-mono">{recentAudit.length}</span>
-            <span className="text-[11px] text-[#34D399] font-mono">Validated Blocks</span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-3xl sm:text-4xl font-extrabold text-[#F1F5F9] font-mono tracking-tight">{recentAudit.length}</span>
+            <span className="text-[11px] text-[#F2B84B] font-mono font-medium flex items-center space-x-1">
+              <span>●</span>
+              <span>Validated Blocks</span>
+            </span>
           </div>
         </div>
 
-        <div className="bg-[#111827] p-5 rounded-2xl border border-[#253044] space-y-3 shadow-subtle hover:border-[#22D3EE]/40 transition-colors">
+        {/* System Safety */}
+        <div className="bg-[#0E1726] hover:bg-[#121E30] p-5 rounded-xl border border-[#1B2B40] hover:border-[#20C997]/30 space-y-2.5 shadow-card transition-all duration-150">
           <div className="flex items-center justify-between text-[#94A3B8]">
-            <span className="text-[11px] font-semibold uppercase tracking-wider font-mono">System Safety</span>
-            <CheckCircle2 className="w-4 h-4 text-[#34D399]" />
+            <span className="text-[10px] font-bold uppercase tracking-wider font-mono">SYSTEM SAFETY</span>
+            <div className="p-1.5 rounded-lg bg-[#20C997]/10 text-[#20C997] border border-[#20C997]/20">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
           </div>
-          <div className="flex items-baseline space-x-2">
-            <span className="text-lg font-bold text-[#34D399] font-mono">PASS</span>
-            <span className="text-[11px] text-[#94A3B8] font-mono">Simulated Only</span>
+          <div className="flex items-baseline justify-between">
+            <span className="text-3xl sm:text-4xl font-extrabold text-[#20C997] font-mono tracking-tight">PASS</span>
+            <span className="text-[11px] text-[#8B6CFF] font-mono font-medium flex items-center space-x-1">
+              <span>●</span>
+              <span>Simulated Only</span>
+            </span>
           </div>
         </div>
       </div>
 
       {/* Quick Launch Operations */}
-      <div className="space-y-3">
-        <h3 className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider font-mono">
+      <div className="space-y-2.5">
+        <h2 className="text-xs font-bold text-[#64748B] uppercase tracking-wider font-mono">
           Quick Launch Operations
-        </h3>
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             onClick={() => onNavigate('sanitization')}
-            className="p-5 bg-[#111827] hover:bg-[#162032] border border-[#253044] hover:border-[#FB7185]/50 rounded-2xl text-left space-y-2 group transition-all cursor-pointer shadow-subtle"
+            className="p-4 sm:p-5 bg-[#0E1726] hover:bg-[#121E30] border border-[#1B2B40] hover:border-[#FB7185]/40 rounded-xl text-left space-y-2 group transition-all duration-150 cursor-pointer shadow-card"
           >
-            <div className="flex items-center justify-between text-[#FB7185]">
-              <Flame className="w-5 h-5" />
-              <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#94A3B8]" />
+            <div className="flex items-center justify-between">
+              <div className="p-1.5 bg-[#FB7185]/10 border border-[#FB7185]/20 rounded-lg text-[#FB7185]">
+                <Flame className="w-4 h-4" />
+              </div>
+              <ArrowUpRight className="w-4 h-4 text-[#64748B] group-hover:text-[#FB7185] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
             </div>
-            <h4 className="text-sm font-semibold text-[#F8FAFC] group-hover:text-[#FB7185] transition-colors">
+            <h3 className="text-sm font-bold text-[#F1F5F9] group-hover:text-[#FB7185] transition-colors">
               Drive Sanitization Wizard
-            </h4>
+            </h3>
             <p className="text-xs text-[#94A3B8] leading-relaxed">
               Safety-gated storage media sanitization & block overwrite with dry-run audit.
             </p>
@@ -140,15 +199,17 @@ export const DashboardPage: React.FC<{ onNavigate: (tabId: string) => void }> = 
 
           <button
             onClick={() => onNavigate('evidence')}
-            className="p-5 bg-[#111827] hover:bg-[#162032] border border-[#253044] hover:border-[#22D3EE]/50 rounded-2xl text-left space-y-2 group transition-all cursor-pointer shadow-subtle"
+            className="p-4 sm:p-5 bg-[#0E1726] hover:bg-[#121E30] border border-[#1B2B40] hover:border-[#16C7D9]/40 rounded-xl text-left space-y-2 group transition-all duration-150 cursor-pointer shadow-card"
           >
-            <div className="flex items-center justify-between text-[#22D3EE]">
-              <UploadCloud className="w-5 h-5" />
-              <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#94A3B8]" />
+            <div className="flex items-center justify-between">
+              <div className="p-1.5 bg-[#16C7D9]/10 border border-[#16C7D9]/20 rounded-lg text-[#16C7D9]">
+                <UploadCloud className="w-4 h-4" />
+              </div>
+              <ArrowUpRight className="w-4 h-4 text-[#64748B] group-hover:text-[#16C7D9] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
             </div>
-            <h4 className="text-sm font-semibold text-[#F8FAFC] group-hover:text-[#22D3EE] transition-colors">
+            <h3 className="text-sm font-bold text-[#F1F5F9] group-hover:text-[#16C7D9] transition-colors">
               Evidence Image Intake
-            </h4>
+            </h3>
             <p className="text-xs text-[#94A3B8] leading-relaxed">
               Read-only streaming SHA-256 ingestion & working copy image setup.
             </p>
@@ -156,15 +217,17 @@ export const DashboardPage: React.FC<{ onNavigate: (tabId: string) => void }> = 
 
           <button
             onClick={() => onNavigate('recovery')}
-            className="p-5 bg-[#111827] hover:bg-[#162032] border border-[#253044] hover:border-[#FBBF24]/50 rounded-2xl text-left space-y-2 group transition-all cursor-pointer shadow-subtle"
+            className="p-4 sm:p-5 bg-[#0E1726] hover:bg-[#121E30] border border-[#1B2B40] hover:border-[#F2B84B]/40 rounded-xl text-left space-y-2 group transition-all duration-150 cursor-pointer shadow-card"
           >
-            <div className="flex items-center justify-between text-[#FBBF24]">
-              <FileSearch className="w-5 h-5" />
-              <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-[#94A3B8]" />
+            <div className="flex items-center justify-between">
+              <div className="p-1.5 bg-[#F2B84B]/10 border border-[#F2B84B]/20 rounded-lg text-[#F2B84B]">
+                <FileSearch className="w-4 h-4" />
+              </div>
+              <ArrowUpRight className="w-4 h-4 text-[#64748B] group-hover:text-[#F2B84B] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
             </div>
-            <h4 className="text-sm font-semibold text-[#F8FAFC] group-hover:text-[#FBBF24] transition-colors">
+            <h3 className="text-sm font-bold text-[#F1F5F9] group-hover:text-[#F2B84B] transition-colors">
               Recovery & Carving Hub
-            </h4>
+            </h3>
             <p className="text-xs text-[#94A3B8] leading-relaxed">
               Filesystem extent extraction & signature-based file carving engine.
             </p>
@@ -172,43 +235,126 @@ export const DashboardPage: React.FC<{ onNavigate: (tabId: string) => void }> = 
         </div>
       </div>
 
-      {/* Recent Audit Ledger Snippet */}
-      <div className="bg-[#111827] border border-[#253044] rounded-2xl p-5 space-y-4 shadow-card">
-        <div className="flex items-center justify-between border-b border-[#253044] pb-3">
-          <div className="flex items-center space-x-2">
-            <History className="w-4 h-4 text-[#22D3EE]" />
-            <h3 className="text-sm font-semibold text-[#F8FAFC]">Recent Audit Chain Events</h3>
+      {/* Two-Column Security Section: Recent Audit Events & Case Activity Telemetry */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Left Column: Recent Audit Chain Events Log */}
+        <div className="lg:col-span-7 bg-[#0E1726] border border-[#1B2B40] rounded-xl p-5 space-y-3.5 shadow-card">
+          <div className="flex items-center justify-between border-b border-[#1B2B40] pb-3">
+            <div className="flex items-center space-x-2">
+              <div className="p-1 rounded bg-[#1683FF]/10 text-[#1683FF]">
+                <History className="w-4 h-4" />
+              </div>
+              <h2 className="text-sm font-bold text-[#F1F5F9]">Recent Audit Chain Events</h2>
+            </div>
+            <button
+              onClick={() => onNavigate('audit')}
+              className="text-xs text-[#1683FF] hover:text-[#5EEAD4] font-medium font-mono cursor-pointer flex items-center space-x-1 transition-colors"
+            >
+              <span>View Full Ledger</span>
+              <span>→</span>
+            </button>
           </div>
-          <button
-            onClick={() => onNavigate('audit')}
-            className="text-xs text-[#22D3EE] hover:text-[#67E8F9] font-medium font-mono cursor-pointer flex items-center space-x-1"
-          >
-            <span>View Full Ledger</span>
-            <span>→</span>
-          </button>
+
+          <div className="space-y-1.5 text-xs">
+            {recentAudit.map(ev => (
+              <div
+                key={ev.id}
+                className="p-2.5 bg-[#080D17] hover:bg-[#121E30] border border-[#1B2B40] rounded-lg flex items-center justify-between gap-3 transition-colors"
+              >
+                <div className="space-y-0.5 min-w-0">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-mono text-[#64748B] text-[10px]">
+                      {ev.timestamp ? ev.timestamp.substring(11, 19) : '--:--:--'} UTC
+                    </span>
+                    <span className="font-mono text-[#16C7D9] font-bold text-xs">{ev.action}</span>
+                  </div>
+                  <p className="text-[#94A3B8] text-[11px] truncate max-w-xs sm:max-w-sm">{ev.target_summary}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <StatusBadge status={ev.result} />
+                </div>
+              </div>
+            ))}
+            {recentAudit.length === 0 && (
+              <p className="text-[#64748B] text-center py-6 text-xs">No recent audit events recorded.</p>
+            )}
+          </div>
         </div>
 
-        <div className="space-y-2 text-xs">
-          {recentAudit.map(ev => (
-            <div
-              key={ev.id}
-              className="p-3 bg-[#0B0F19] hover:bg-[#162032] border border-[#253044] rounded-xl flex items-center justify-between gap-4 transition-colors"
-            >
-              <div className="space-y-0.5 min-w-0">
-                <span className="font-mono text-[#22D3EE] font-semibold text-xs">{ev.action}</span>
-                <p className="text-[#94A3B8] text-[11px] truncate max-w-xl">{ev.target_summary}</p>
+        {/* Right Column: Case Activity & Telemetry Monitor */}
+        <div className="lg:col-span-5 bg-[#0E1726] border border-[#1B2B40] rounded-xl p-5 space-y-3.5 shadow-card flex flex-col justify-between">
+          <div className="flex items-center justify-between border-b border-[#1B2B40] pb-3">
+            <div className="flex items-center space-x-2">
+              <div className="p-1 rounded bg-[#1683FF]/10 text-[#1683FF]">
+                <Shield className="w-4 h-4" />
               </div>
-              <div className="text-right shrink-0">
-                <StatusBadge status={ev.result} />
-                <span className="block font-mono text-[10px] text-[#64748B] mt-1">
-                  {ev.timestamp.substring(11, 19)} UTC
+              <h2 className="text-sm font-bold text-[#F1F5F9]">Case Activity & Telemetry</h2>
+            </div>
+            <span className="text-[10px] font-mono text-[#20C997] bg-[#20C997]/10 border border-[#20C997]/20 px-2 py-0.5 rounded flex items-center space-x-1">
+              <Radio className="w-3 h-3 animate-pulse text-[#20C997]" />
+              <span>TELEMETRY</span>
+            </span>
+          </div>
+
+          {/* Activity Metrics Bars with Subtle Enterprise Grid */}
+          <div className="space-y-3 text-xs">
+            <div className="bg-[#080D17] p-3 rounded-lg border border-[#1B2B40] space-y-1.5">
+              <div className="flex items-center justify-between font-mono text-[11px]">
+                <span className="text-[#94A3B8] flex items-center space-x-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#1683FF]" />
+                  <span>Cases In-Flight</span>
                 </span>
+                <span className="font-bold text-[#F1F5F9]">{cases.length} Registered</span>
+              </div>
+              <div className="w-full bg-[#070B14] rounded-full h-1.5 overflow-hidden border border-[#1B2B40]">
+                <div
+                  className="bg-[#1683FF] h-1.5 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(100, Math.max(20, cases.length * 20))}%` }}
+                />
               </div>
             </div>
-          ))}
-          {recentAudit.length === 0 && (
-            <p className="text-[#64748B] text-center py-6 text-xs">No recent audit events recorded.</p>
-          )}
+
+            <div className="bg-[#080D17] p-3 rounded-lg border border-[#1B2B40] space-y-1.5">
+              <div className="flex items-center justify-between font-mono text-[11px]">
+                <span className="text-[#94A3B8] flex items-center space-x-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#16C7D9]" />
+                  <span>Async Job Workers</span>
+                </span>
+                <span className="font-bold text-[#F1F5F9]">{recentJobs.length} Processed</span>
+              </div>
+              <div className="w-full bg-[#070B14] rounded-full h-1.5 overflow-hidden border border-[#1B2B40]">
+                <div
+                  className="bg-[#16C7D9] h-1.5 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(100, Math.max(15, recentJobs.length * 25))}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="bg-[#080D17] p-3 rounded-lg border border-[#1B2B40] space-y-1.5">
+              <div className="flex items-center justify-between font-mono text-[11px]">
+                <span className="text-[#94A3B8] flex items-center space-x-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#F2B84B]" />
+                  <span>Audit Chain Blocks</span>
+                </span>
+                <span className="font-bold text-[#F1F5F9]">{recentAudit.length} Validated</span>
+              </div>
+              <div className="w-full bg-[#070B14] rounded-full h-1.5 overflow-hidden border border-[#1B2B40]">
+                <div
+                  className="bg-[#F2B84B] h-1.5 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(100, Math.max(25, recentAudit.length * 20))}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Cryptographic Ledger Verification Footer */}
+          <div className="pt-2 border-t border-[#1B2B40] flex items-center justify-between text-[11px] font-mono text-[#64748B]">
+            <span className="flex items-center space-x-1 text-[#20C997]">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>SHA-256 Ledger: VERIFIED</span>
+            </span>
+            <span className="text-[#94A3B8]">NIST SP 800-88</span>
+          </div>
         </div>
       </div>
     </div>

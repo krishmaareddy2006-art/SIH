@@ -2,6 +2,7 @@
 
 import logging
 from datetime import timedelta
+from typing import Dict
 from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
 
@@ -23,7 +24,7 @@ async def login(
     login_data: LoginRequest,
     request: Request,
     db: Session = Depends(get_db),
-):
+) -> TokenResponse:
     """Authenticates user credentials and generates a signed JWT Access Token."""
     request_id = getattr(request.state, "request_id", "N/A")
 
@@ -97,7 +98,7 @@ async def login(
 
 
 @router.post("/logout")
-async def logout(request: Request, current_user: User = Depends(get_current_user)):
+async def logout(request: Request, current_user: User = Depends(get_current_user)) -> Dict[str, str]:
     """Logs out user session and records audit trail event."""
     request_id = getattr(request.state, "request_id", "N/A")
 
@@ -113,7 +114,7 @@ async def logout(request: Request, current_user: User = Depends(get_current_user
 
 
 @router.get("/me", response_model=UserProfileResponse)
-async def get_current_user_profile(current_user: User = Depends(get_current_user)):
+async def get_current_user_profile(current_user: User = Depends(get_current_user)) -> UserProfileResponse:
     """Returns currently authenticated user profile and active permission scopes."""
     permissions = [p.name for p in current_user.role.permissions]
 

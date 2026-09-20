@@ -12,43 +12,43 @@ class DataExtent(BaseModel):
 
 
 class CandidateItem(BaseModel):
-    candidate_id: str = Field(..., example="REC-CAND-001")
-    name: str = Field(..., example="invoice_deleted.pdf")
-    path: str = Field(..., example="/documents/financial/invoice_deleted.pdf")
-    record_identifier: str = Field(..., example="Inode #1042 / MFT Record #452")
-    declared_size_bytes: int = Field(..., example=1048576)
-    file_size_bytes: Optional[int] = Field(None, example=1048576)
-    created_at: Optional[str] = Field(None, example="2026-09-01T12:00:00Z")
-    modified_at: Optional[str] = Field(None, example="2026-09-10T14:30:00Z")
-    deleted_at: Optional[str] = Field(None, example="2026-09-12T09:15:00Z")
+    candidate_id: str = Field(..., examples=["REC-CAND-001"])
+    name: str = Field(..., examples=["invoice_deleted.pdf"])
+    path: str = Field(..., examples=["/documents/financial/invoice_deleted.pdf"])
+    record_identifier: str = Field(..., examples=["Inode #1042 / MFT Record #452"])
+    declared_size_bytes: int = Field(..., examples=[1048576])
+    file_size_bytes: Optional[int] = Field(None, examples=[1048576])
+    created_at: Optional[str] = Field(None, examples=["2026-09-01T12:00:00Z"])
+    modified_at: Optional[str] = Field(None, examples=["2026-09-10T14:30:00Z"])
+    deleted_at: Optional[str] = Field(None, examples=["2026-09-12T09:15:00Z"])
     extents: List[DataExtent] = Field(default_factory=list)
     source_offset_bytes: Optional[int] = Field(0)
     classification_status: str = Field(
         ...,
-        example="RECOVERABLE",
+        examples=["RECOVERABLE"],
         description="RECOVERABLE, PARTIALLY_RECOVERABLE, METADATA_ONLY, CORRUPTED, UNSUPPORTED",
     )
-    filesystem_type: str = Field(..., example="FAT32", description="FAT32, NTFS, EXT4, UNSUPPORTED")
+    filesystem_type: str = Field(..., examples=["FAT32"], description="FAT32, NTFS, EXT4, UNSUPPORTED")
     confidence_score: int = Field(95, description="Recovery confidence score (0-100)")
     is_recovered: bool = Field(False)
     download_url: Optional[str] = None
-    notes: Optional[str] = Field(None, example="Clean directory record entry carved")
+    notes: Optional[str] = Field(None, examples=["Clean directory record entry carved"])
 
 
 class RecoveryScanRequest(BaseModel):
-    evidence_id: Optional[str] = Field(None, description="Target forensic evidence identifier", example="EVD-20260913-001")
-    device_path: Optional[str] = Field(None, description="Target physical/logical storage device path, e.g. E:\\ or /dev/sdb", example="E:\\")
+    evidence_id: Optional[str] = Field(None, description="Target forensic evidence identifier", examples=["EVD-20260913-001"])
+    device_path: Optional[str] = Field(None, description="Target physical/logical storage device path, e.g. E:\\ or /dev/sdb", examples=["E:\\"])
     target_output_dir: Optional[str] = Field(None, description="Optional custom directory for extracted outputs")
 
 
 class RecoveryScanResponse(BaseModel):
-    scan_id: str = Field(..., example="scan-9a8b7c6d")
+    scan_id: str = Field(..., examples=["scan-9a8b7c6d"])
     evidence_id: Optional[str] = None
     device_path: Optional[str] = None
     case_id: int
-    filesystem_detected: str = Field(..., example="FAT32")
-    pre_scan_sha256: str = Field(..., example="a2c44cb544d9e0c7297d5dd5761bed2e0f36a57a46cdce53e5bd3e53d172b74c")
-    post_scan_sha256: str = Field(..., example="a2c44cb544d9e0c7297d5dd5761bed2e0f36a57a46cdce53e5bd3e53d172b74c")
+    filesystem_detected: str = Field(..., examples=["FAT32"])
+    pre_scan_sha256: str = Field(..., examples=["a2c44cb544d9e0c7297d5dd5761bed2e0f36a57a46cdce53e5bd3e53d172b74c"])
+    post_scan_sha256: str = Field(..., examples=["a2c44cb544d9e0c7297d5dd5761bed2e0f36a57a46cdce53e5bd3e53d172b74c"])
     is_evidence_untouched: bool = Field(True, description="Verified pre_scan_sha256 == post_scan_sha256")
     total_candidates_found: int
     candidates_by_status: Dict[str, int]
@@ -57,9 +57,9 @@ class RecoveryScanResponse(BaseModel):
 
 
 class RecoveryExtractRequest(BaseModel):
-    evidence_id: Optional[str] = Field(None, example="EVD-20260913-001")
-    device_path: Optional[str] = Field(None, example="E:\\")
-    candidate_ids: List[str] = Field(..., example=["REC-CAND-001", "REC-CAND-002"])
+    evidence_id: Optional[str] = Field(None, examples=["EVD-20260913-001"])
+    device_path: Optional[str] = Field(None, examples=["E:\\"])
+    candidate_ids: List[str] = Field(..., examples=[["REC-CAND-001", "REC-CAND-002"]])
     custom_output_dir: Optional[str] = Field(None, description="Optional custom export folder")
 
 

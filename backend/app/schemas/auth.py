@@ -5,8 +5,8 @@ from pydantic import BaseModel, Field
 
 
 class LoginRequest(BaseModel):
-    username: str = Field(..., example="admin")
-    password: str = Field(..., example="AdminPass123!")
+    username: str = Field(..., examples=["admin"])
+    password: str = Field(..., examples=["AdminPass123!"])
 
 
 class TokenResponse(BaseModel):

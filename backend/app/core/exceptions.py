@@ -20,7 +20,7 @@ class ForensicShieldException(Exception):
         message: str,
         code: str = "INTERNAL_ERROR",
         status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-    ):
+    ) -> None:
         self.message = message
         self.code = code
         self.status_code = status_code
@@ -33,7 +33,7 @@ class SafeModeViolationException(ForensicShieldException):
     def __init__(
         self,
         message: str = "Destructive execution blocked. SAFE_MODE is active.",
-    ):
+    ) -> None:
         super().__init__(
             message=message,
             code="SAFE_MODE_BLOCKED",
@@ -47,7 +47,7 @@ class RealDeviceOperationBlockedException(ForensicShieldException):
     def __init__(
         self,
         message: str = "Real hardware device access is disabled by system policy.",
-    ):
+    ) -> None:
         super().__init__(
             message=message,
             code="REAL_DEVICE_OPS_DISABLED",
@@ -58,7 +58,7 @@ class RealDeviceOperationBlockedException(ForensicShieldException):
 class ResourceNotFoundException(ForensicShieldException):
     """Raised when requested forensic resource is missing."""
 
-    def __init__(self, message: str = "Requested forensic resource not found."):
+    def __init__(self, message: str = "Requested forensic resource not found.") -> None:
         super().__init__(
             message=message,
             code="RESOURCE_NOT_FOUND",

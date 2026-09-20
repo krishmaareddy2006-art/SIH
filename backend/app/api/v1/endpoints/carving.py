@@ -80,8 +80,8 @@ async def list_carved_artifacts(
     case: ForensicCase = Depends(verify_case_access),
     db: Session = Depends(get_db),
 ) -> List[CarvedArtifactResponse]:
-    """Lists all carved file artifacts attached to an accessible case context. (IDOR Protected)."""
-    return db.query(CarvedFileArtifact).filter(CarvedFileArtifact.case_id == case.id).all()
+    artifacts = db.query(CarvedFileArtifact).filter(CarvedFileArtifact.case_id == case.id).all()
+    return [CarvedArtifactResponse.model_validate(a) for a in artifacts]
 
 
 @router.get("/carving/{carved_id}/download")

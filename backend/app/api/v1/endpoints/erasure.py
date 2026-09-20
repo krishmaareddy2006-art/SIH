@@ -1,6 +1,9 @@
-"""Controlled File & Folder Erasure API Endpoints."""
-
-from fastapi import APIRouter, Depends, Request
+import hashlib
+import os
+from pathlib import Path
+from typing import Any, Dict
+from fastapi import APIRouter, Depends, Query, Request
+from app.core.exceptions import ForensicShieldException
 from app.core.logging import audit_log
 from app.core.dependencies import require_roles
 from app.models.auth import User
@@ -16,12 +19,6 @@ from app.services.file_erasure import (
     PathSandboxGuard,
 )
 
-from fastapi import APIRouter, Depends, Request, Query
-import os
-import hashlib
-from pathlib import Path
-from app.core.exceptions import ForensicShieldException
-
 router = APIRouter()
 
 
@@ -29,7 +26,7 @@ router = APIRouter()
 async def analyze_file_erasure(
     path: str = Query(..., description="Target file or folder path to analyze"),
     current_user: User = Depends(require_roles(["Administrator", "Operator"])),
-):
+) -> Dict[str, Any]:
     """Analyzes target path size and computes pre-erasure SHA-256 for audit tracking."""
     if not path or not path.strip():
         raise ForensicShieldException("Path must be specified", code="INVALID_PATH", status_code=400)
@@ -77,7 +74,7 @@ async def generate_erasure_confirmation_token(
     token_req: ErasureTokenRequest,
     request: Request,
     current_user: User = Depends(require_roles(["Administrator", "Operator"])),
-):
+) -> ErasureTokenResponse:
     """
     Validates target sandbox path and generates a unique confirmation token for sensitive file erasure.
     """
@@ -118,7 +115,7 @@ async def execute_file_erasure(
     erasure_req: ErasureExecuteRequest,
     request: Request,
     current_user: User = Depends(require_roles(["Administrator", "Operator"])),
-):
+) -> ErasureReport:
     """
     Executes dry-run preview or controlled live logical file/folder erasure.
     Requires Administrator or Operator role, sandbox path validation,

@@ -37,24 +37,24 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'sm' })
   const isManualReview = norm === 'MANUAL REVIEW' || norm === 'MANUAL_REVIEW' || norm === 'METADATA_ONLY';
 
   let config = {
-    container: 'bg-[#111827] text-[#94A3B8] border-[#253044]',
-    dot: 'bg-[#94A3B8]',
-    icon: <HelpCircle className="w-3 h-3 mr-1 text-[#94A3B8]" />,
+    container: 'bg-[#101827] text-[#91A0B5] border-[#1E3048]',
+    dot: 'bg-[#91A0B5]',
+    icon: <HelpCircle className="w-3 h-3 mr-1 text-[#91A0B5]" />,
     label: status || 'Unknown',
   };
 
   if (isVerified) {
     config = {
-      container: 'bg-[#34D399]/10 text-[#34D399] border-[#34D399]/30',
-      dot: 'bg-[#34D399]',
-      icon: <CheckCircle2 className="w-3 h-3 mr-1 text-[#34D399]" />,
+      container: 'bg-[#20D69A]/10 text-[#20D69A] border-[#20D69A]/30',
+      dot: 'bg-[#20D69A]',
+      icon: <CheckCircle2 className="w-3 h-3 mr-1 text-[#20D69A]" />,
       label: norm === 'COMPLETED' ? 'Completed' : norm === 'RECOVERABLE' ? 'Recoverable' : norm === 'HIGH' ? 'High Confidence' : 'Verified',
     };
   } else if (isInconclusive) {
     config = {
-      container: 'bg-[#FBBF24]/10 text-[#FBBF24] border-[#FBBF24]/30',
-      dot: 'bg-[#FBBF24]',
-      icon: <HelpCircle className="w-3 h-3 mr-1 text-[#FBBF24]" />,
+      container: 'bg-[#F5B642]/10 text-[#F5B642] border-[#F5B642]/30',
+      dot: 'bg-[#F5B642]',
+      icon: <HelpCircle className="w-3 h-3 mr-1 text-[#F5B642]" />,
       label: norm === 'RUNNING' ? 'Running' : norm === 'QUEUED' ? 'Queued' : norm === 'PARTIALLY_RECOVERABLE' ? 'Partially Recoverable' : 'Inconclusive',
     };
   } else if (isFailed) {
@@ -66,16 +66,16 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'sm' })
     };
   } else if (isUnsupported) {
     config = {
-      container: 'bg-[#A78BFA]/10 text-[#C4B5FD] border-[#A78BFA]/30',
-      dot: 'bg-[#A78BFA]',
-      icon: <AlertOctagon className="w-3 h-3 mr-1 text-[#A78BFA]" />,
+      container: 'bg-[#8B6CFF]/10 text-[#8B6CFF] border-[#8B6CFF]/30',
+      dot: 'bg-[#8B6CFF]',
+      icon: <AlertOctagon className="w-3 h-3 mr-1 text-[#8B6CFF]" />,
       label: norm === 'LOW' ? 'Low Confidence' : 'Unsupported',
     };
   } else if (isManualReview) {
     config = {
-      container: 'bg-[#22D3EE]/10 text-[#22D3EE] border-[#22D3EE]/30',
-      dot: 'bg-[#22D3EE]',
-      icon: <UserCheck className="w-3 h-3 mr-1 text-[#22D3EE]" />,
+      container: 'bg-[#19D3E6]/10 text-[#19D3E6] border-[#19D3E6]/30',
+      dot: 'bg-[#19D3E6]',
+      icon: <UserCheck className="w-3 h-3 mr-1 text-[#19D3E6]" />,
       label: 'Manual Review',
     };
   }

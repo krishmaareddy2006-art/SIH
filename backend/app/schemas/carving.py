@@ -15,21 +15,21 @@ class CarvingMetrics(BaseModel):
 
 
 class CarvingCandidateItem(BaseModel):
-    candidate_id: str = Field(..., example="CARV-CAND-001")
-    format: str = Field(..., example="JPEG", description="JPEG, PNG, PDF, ZIP")
-    start_offset: int = Field(..., example=65536)
-    end_offset: int = Field(..., example=131072)
-    length_bytes: int = Field(..., example=65536)
-    header_signature_hex: str = Field(..., example="FFD8FF")
-    footer_signature_hex: Optional[str] = Field(None, example="FFD9")
-    confidence_level: str = Field(..., example="HIGH", description="HIGH, MEDIUM, LOW")
-    validation_reason: str = Field(..., example="Valid SOI, EOI, and APP0/EXIF metadata headers verified")
+    candidate_id: str = Field(..., examples=["CARV-CAND-001"])
+    format: str = Field(..., examples=["JPEG"], description="JPEG, PNG, PDF, ZIP")
+    start_offset: int = Field(..., examples=[65536])
+    end_offset: int = Field(..., examples=[131072])
+    length_bytes: int = Field(..., examples=[65536])
+    header_signature_hex: str = Field(..., examples=["FFD8FF"])
+    footer_signature_hex: Optional[str] = Field(None, examples=["FFD9"])
+    confidence_level: str = Field(..., examples=["HIGH"], description="HIGH, MEDIUM, LOW")
+    validation_reason: str = Field(..., examples=["Valid SOI, EOI, and APP0/EXIF metadata headers verified"])
     is_valid: bool = Field(True)
 
 
 class CarvingScanRequest(BaseModel):
-    evidence_id: Optional[str] = Field(None, example="EVD-20260913-001")
-    device_path: Optional[str] = Field(None, example="E:\\")
+    evidence_id: Optional[str] = Field(None, examples=["EVD-20260913-001"])
+    device_path: Optional[str] = Field(None, examples=["E:\\"])
     target_formats: Optional[List[str]] = Field(None, description="Optional target formats filter ['JPEG', 'PNG', 'PDF', 'ZIP']")
     custom_output_dir: Optional[str] = Field(None, description="Optional custom extraction output directory")
 

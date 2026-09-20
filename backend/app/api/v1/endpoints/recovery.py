@@ -38,7 +38,7 @@ async def scan_filesystem_recovery(
     case: ForensicCase = Depends(verify_case_access),
     current_user: User = Depends(require_roles(["Administrator", "Investigator", "Operator"])),
     db: Session = Depends(get_db),
-):
+) -> RecoveryScanResponse:
     """
     Executes read-only filesystem-aware recovery scan on evidence image or storage device:
     1. Detects filesystem signature and parses candidate deleted entries.
@@ -88,7 +88,7 @@ async def extract_recovery_artifacts(
     case: ForensicCase = Depends(verify_case_access),
     current_user: User = Depends(require_roles(["Administrator", "Investigator", "Operator"])),
     db: Session = Depends(get_db),
-):
+) -> RecoveryExtractJobResponse:
     """
     Extracts selected recovery candidate data to output directory with complete provenance records.
     (IDOR & RBAC Protected).
@@ -123,7 +123,7 @@ async def extract_recovery_artifacts(
 async def list_recovered_artifacts(
     case: ForensicCase = Depends(verify_case_access),
     db: Session = Depends(get_db),
-):
+) -> List[ExtractedArtifactResponse]:
     """Lists all recovered artifacts attached to an accessible case context. (IDOR Protected)."""
     artifacts = db.query(RecoveredArtifact).filter(RecoveredArtifact.case_id == case.id).all()
     results = []

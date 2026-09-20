@@ -64,6 +64,13 @@ def _format_device_info(dev: DiscoveredDevice) -> Dict[str, Any]:
     """Formats DiscoveredDevice into DeviceInfo format."""
     d_type = "USB" if dev.transport == "usb" else ("HDD" if dev.is_rotational else ("NVMe" if dev.transport == "nvme" else "SSD"))
     rec_method = "NIST 800-88 Purge (NVMe Sanitize)" if d_type == "NVMe" else ("NIST 800-88 Clear" if d_type == "HDD" else "NIST 800-88 Block Erase")
+    is_sys = dev.is_boot_system_disk or any(m in ("/", "/boot", "/etc") for m in dev.mount_points)
+    v_lower = (dev.vendor or "").lower()
+    m_lower = (dev.model or "").lower()
+    id_lower = (dev.stable_identifier or "").lower()
+    if "amazon" in v_lower or "amazon" in m_lower or "elastic_block_store" in id_lower or "ebs" in id_lower:
+        is_sys = True
+
     return {
         "device_path": dev.device_path,
         "device_type": d_type,
@@ -71,13 +78,13 @@ def _format_device_info(dev: DiscoveredDevice) -> Dict[str, Any]:
         "vendor": dev.vendor or "Generic Vendor",
         "model": dev.model or "Storage Device",
         "serial_number": dev.stable_identifier.split("/")[-1] if dev.stable_identifier else "GENERIC-SERIAL",
-        "is_system_disk": dev.is_boot_system_disk,
+        "is_system_disk": is_sys,
         "is_mounted": len(dev.mount_points) > 0,
         "bus_type": (dev.transport or "SATA").upper(),
         "mount_point": dev.mount_points[0] if dev.mount_points else "",
         "recommended_method": rec_method,
         "confidence_level": "HIGH",
-        "in_allowlist": True,
+        "in_allowlist": not is_sys,
     }
 
 
@@ -88,14 +95,17 @@ async def scan_devices(
     current_user: User = Depends(require_roles(["Administrator", "Investigator", "Operator", "Viewer"])),
 ) -> List[Dict[str, Any]]:
     """
-    Scans local storage devices. Returns list of DeviceInfo objects.
-    Provides simulated fallback devices when running on Windows/macOS or in SAFE_MODE simulation.
+    Scans storage devices. Returns list of DeviceInfo objects.
+    Combines physical hardware bus discovery with forensic lab & synthetic demonstration devices
+    to ensure complete forensic targets (SATA HDD, SSD, USB) are always available.
     """
+    devices: List[Dict[str, Any]] = []
     discovery_service = DeviceDiscoveryService()
     try:
         res = discovery_service.discover_devices()
-        if res and res.devices and len(res.devices) > 0:
-            return [_format_device_info(d) for d in res.devices]
+        if res and res.devices:
+            for d in res.devices:
+                devices.append(_format_device_info(d))
     except Exception as exc:
         audit_log(
             message=f"Device discovery encountered error, falling back to simulated devices: {str(exc)}",
@@ -103,7 +113,13 @@ async def scan_devices(
             status="WARNING",
         )
 
-    return SIMULATED_DEVICES
+    # Always ensure test-lab forensic devices (SATA HDD, SSD, USB) are available alongside host disks
+    existing_paths = {d["device_path"] for d in devices}
+    for sim_dev in SIMULATED_DEVICES:
+        if sim_dev["device_path"] not in existing_paths:
+            devices.append(sim_dev)
+
+    return devices
 
 
 @router.get("/discover", response_model=DeviceDiscoveryResponse)
